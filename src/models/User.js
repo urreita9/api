@@ -11,9 +11,13 @@ module.exports = (sequelize) => {
                 defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
             },
-            mail: {
+            email: {
                 type: DataTypes.STRING,
                 unique: true,
+                allowNull: false,
+            },
+            password: {
+                type: DataTypes.STRING,
                 allowNull: false,
             },
             name: {
@@ -24,12 +28,16 @@ module.exports = (sequelize) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            adress: {
+            address: {
                 type: DataTypes.STRING,
             },
             points: {
                 type: DataTypes.FLOAT,
                 defaultValue: 0,
+            },
+            role: {
+                type: DataTypes.ENUM("USER", "ADMIN"),
+                defaultValue: "USER",
             },
         },
         { logging: false, timestamps: false }
