@@ -14,6 +14,14 @@ const existeUsuarioPorId = async (id = "") => {
     }
 };
 
+const existePetPorId = async (id = "") => {
+    const existePet = await Pet.findByPk(id);
+    if (!existePet) {
+        throw new Error(`El id ${id} no existe`);
+    }
+};
+
 module.exports = {
     existeUsuarioPorId,
+    existePetPorId,
 };

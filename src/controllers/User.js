@@ -6,14 +6,10 @@ const bcryptjs = require("bcryptjs");
 const getUsers = async (req = request, res = response) => {
     const users = await User.findAll({
         include: [
-            Pet,
-            // {
-            //     model: Pet,
-            //     attributes: ["id", "name"],
-            //     through: {
-            //         attributes: [],
-            //     },
-            // },
+            {
+                model: Pet,
+                attributes: ["id", "name"],
+            },
         ],
     });
 
@@ -23,7 +19,14 @@ const getUsers = async (req = request, res = response) => {
 const getUser = async (req = request, res = response) => {
     const { id } = req.params;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+        include: [
+            {
+                model: Pet,
+                attributes: ["id", "name"],
+            },
+        ],
+    });
 
     res.json(user);
 };
@@ -69,7 +72,6 @@ const editUser = async (req = request, res = response) => {
             resto[i] = resto[i].toLowerCase();
         }
     }
-
 
     await user.update(resto);
 

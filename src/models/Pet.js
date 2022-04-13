@@ -24,9 +24,9 @@ module.exports = (sequelize) => {
                 defaultValue: "none",
             },
             size: {
-                type: DataTypes.ENUM("small", "medium", "big"),
+                type: DataTypes.ENUM("SMALL", "MEDIUM", "BIG"),
                 allowNull: false,
-                defaultValue: "big",
+                defaultValue: "BIG",
             },
             specialFood: {
                 type: DataTypes.BOOLEAN,
