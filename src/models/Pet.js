@@ -4,38 +4,37 @@ const { Sequelize, DataTypes } = require("sequelize");
 module.exports = (sequelize) => {
     //defino el modelo
     sequelize.define(
-        "user",
+        "pet",
         {
             id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
             },
-            email: {
-                type: DataTypes.STRING,
-                unique: true,
-                allowNull: false,
-            },
-            password: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
             name: {
                 type: DataTypes.STRING,
+                allowNull: false,
             },
-            lastname: {
-                type: DataTypes.STRING,
-            },
-            address: {
-                type: DataTypes.STRING,
-            },
-            points: {
-                type: DataTypes.FLOAT,
+            age: {
+                type: DataTypes.INTEGER,
                 defaultValue: 0,
             },
-            role: {
-                type: DataTypes.ENUM("USER", "ADMIN"),
-                defaultValue: "USER",
+            race: {
+                type: DataTypes.STRING,
+                defaultValue: "none",
+            },
+            size: {
+                type: DataTypes.ENUM("SMALL", "MEDIUM", "BIG"),
+                allowNull: false,
+                defaultValue: "BIG",
+            },
+            specialFood: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
+            img: {
+                type: DataTypes.STRING(1000),
+                allowNull: true,
             },
         },
         { logging: false, timestamps: false }
