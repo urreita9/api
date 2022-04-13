@@ -3,7 +3,7 @@ const { check, body } = require("express-validator");
 const { existeUsuarioPorId, existePetPorId } = require("../helpers/db-validators");
 const { validarCampos } = require("../middlewares/validar-campos");
 const { getPets, getPet, createPet, editPet, deletePet } = require("../controllers/Pet");
-const { sizeValidator } = require("../middlewares/validar-pet");
+const { sizeValidator } = require("../helpers/validar-pet");
 
 const router = Router();
 
