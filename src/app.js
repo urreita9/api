@@ -3,9 +3,9 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const routes = require('./routes/index.js');
+const { index, caretaker } = require('./routes');
 
-require('./db.js');
+//require('./db.js');
 
 const server = express();
 server.use(cors());
@@ -30,15 +30,16 @@ server.use(morgan('dev'));
 // 	next();
 // });
 
-server.use('/', routes);
+server.use('/', index);
+server.use('/caretaker', caretaker);
 
 // Error catching endware.
 server.use((err, req, res, next) => {
-	// eslint-disable-line no-unused-vars
-	const status = err.status || 500;
-	const message = err.message || err;
-	console.error(err);
-	res.status(status).send(message);
+  // eslint-disable-line no-unused-vars
+  const status = err.status || 500;
+  const message = err.message || err;
+  console.error(err);
+  res.status(status).send(message);
 });
 
 module.exports = server;
