@@ -18,8 +18,6 @@ router.post(
     [
         check("email", "El email es obligatorio").not().isEmpty(),
         check("email", "El email no es valido").isEmail(),
-        check("name", "El nombre es obligatorio").not().isEmpty(),
-        check("lastname", "El apellido es obligatorio").not().isEmpty(),
         check("password", "La constraseña es obligatoria").not().isEmpty(),
         check("password", "El password tiene que tener mas de 6 letras").isLength({
             min: 6,

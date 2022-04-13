@@ -66,6 +66,7 @@ const { User, Pet } = sequelize.models;
 Pet.belongsTo(User);
 User.hasMany(Pet);
 
+
 // Pokemon.belongsToMany(Type, { through: 'Pokemon_Type' });
 // Type.belongsToMany(Pokemon, { through: 'Pokemon_Type' });
 

@@ -10,6 +10,10 @@ const getUsers = async (req = request, res = response) => {
                 model: Pet,
                 attributes: ["id", "name"],
             },
+            // {
+            //     model:Cuidador,
+            //     attributes: ["id"]
+            // }
         ],
     });
 
@@ -32,7 +36,7 @@ const getUser = async (req = request, res = response) => {
 };
 
 const createUser = async (req = request, res = response) => {
-    let { name, lastname, email, password } = req.body;
+    let { email, password } = req.body;
 
     const user = await User.findOne({
         where: {
@@ -47,12 +51,13 @@ const createUser = async (req = request, res = response) => {
         password = bcryptjs.hashSync(password, salt);
 
         const user = await User.create({
-            name: name.toLowerCase(),
-            lastname: lastname.toLowerCase(),
             email: email.toLowerCase(),
             password,
         });
-        res.json(user);
+
+        const { email: ems, id } = user;
+
+        res.json({ ems, id });
     }
 };
 
@@ -70,6 +75,8 @@ const editUser = async (req = request, res = response) => {
     for (i in resto) {
         if (i !== "role") {
             resto[i] = resto[i].toLowerCase();
+        } else if (i === "role") {
+            resto[i] = resto[i].toUpperCase();
         }
     }
 

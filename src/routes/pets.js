@@ -10,10 +10,10 @@ const router = Router();
 //OBTENER TODOS LOS Pets
 router.get("/", getPets);
 
-//OBTENER UN USER POR ID
+//OBTENER UN PET POR ID
 router.get("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(existePetPorId), validarCampos], getPet);
 
-//CREAR UN USER
+//CREAR UN PET
 router.post(
     "/",
     [
@@ -30,7 +30,7 @@ router.post(
     createPet
 );
 
-//EDITAR UN USER
+//EDITAR UN PET
 router.put(
     "/:id",
     [
@@ -45,7 +45,7 @@ router.put(
     editPet
 );
 
-//BORRAR UN USER
+//BORRAR UN PET
 router.delete("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(existePetPorId), validarCampos], deletePet);
 
 module.exports = router;
