@@ -28,7 +28,7 @@ let sequelize =
 				ssl: true,
 		  })
 		: new Sequelize(
-				`postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`,
+				 `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`,
 				{
 					logging: false,
 					native: false,
@@ -69,7 +69,7 @@ sequelize.models = Object.fromEntries(capsEntries);
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
 
-// const { Pokemon, Type } = sequelize.models;
+ const { Operations } = sequelize.models;
 
 // Aca vendrian las relaciones
 // Pokemon.belongsToMany(Type, { through: 'Pokemon_Type' });
