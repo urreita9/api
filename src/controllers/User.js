@@ -47,8 +47,8 @@ const createUser = async (req = request, res = response) => {
     if (user) {
         res.status(400).json(`Email ${email} en uso`);
     } else {
-        const salt = bcryptjs.genSaltSync();
-        password = bcryptjs.hashSync(password, salt);
+        // const salt = bcryptjs.genSaltSync();
+        password = bcryptjs.hashSync(password, 10);
 
         const user = await User.create({
             email: email.toLowerCase(),
@@ -57,7 +57,9 @@ const createUser = async (req = request, res = response) => {
 
         const { email: ems, id } = user;
 
-        res.json({ ems, id });
+        // res.json({ ems, id });
+
+        res.json(user);
     }
 };
 
@@ -67,13 +69,12 @@ const editUser = async (req = request, res = response) => {
 
     const user = await User.findByPk(id);
     if (password) {
-        const salt = bcryptjs.genSaltSync();
-        password = bcryptjs.hashSync(password, salt);
+        password = bcryptjs.hashSync(password, 10);
 
         resto.password = password;
     }
     for (i in resto) {
-        if (i !== "role") {
+        if (i !== "role" && i !== "password") {
             resto[i] = resto[i].toLowerCase();
         } else if (i === "role") {
             resto[i] = resto[i].toUpperCase();
