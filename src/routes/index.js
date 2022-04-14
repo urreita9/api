@@ -7,14 +7,14 @@ const { Router } = require('express');
 
 const usersRouter = require('./users.js');
 const petsRouter = require('./pets.js');
-const caretaker = require('./caretaker');
+const caretakers = require('./caretakers');
 
 const router = Router();
 
 // Ejemplo: router.use('/auth', authRouter);
 router.use('/users', usersRouter);
 router.use('/pets', petsRouter);
-router.use('/caretaker', caretaker);
+router.use('/caretakers', caretakers);
 
 // Configurar los routers
 // Ejemplo: router.use('/auth', authRouter);
