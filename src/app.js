@@ -3,7 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const { index, caretaker } = require('./routes');
+const routes = require('./routes');
 
 //require('./db.js');
 
@@ -30,8 +30,7 @@ server.use(morgan('dev'));
 // 	next();
 // });
 
-server.use('/', index);
-server.use('/caretaker', caretaker);
+server.use('/api', routes);
 
 // Error catching endware.
 server.use((err, req, res, next) => {
