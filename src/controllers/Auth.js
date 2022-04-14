@@ -16,8 +16,6 @@ const login = async (req = request, res = response) => {
         //Verificar contraseña
         const validPassword = await bcryptjs.compare(password, user.password);
 
-        console.log(validPassword);
-        
         if (!validPassword) {
             return res.status(400).json({ msg: "Usuario / Password incorrecto - password" });
         }
