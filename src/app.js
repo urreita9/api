@@ -3,9 +3,9 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const routes = require('./routes');
+const routes = require('./routes/index.js');
 
-//require('./db.js');
+require('./db.js');
 
 const server = express();
 server.use(cors());
@@ -29,6 +29,12 @@ server.use(morgan('dev'));
 // 	res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
 // 	next();
 // });
+
+// const paths = {
+//     users: "/api/users",
+// };
+
+// server.use(paths.users, require("./routes/users"));
 
 server.use('/api', routes);
 
