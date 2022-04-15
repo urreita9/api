@@ -1,14 +1,14 @@
-const { response } = require("express");
-const { request } = require("express");
-const { User, Pet } = require("../db");
-const bcryptjs = require("bcryptjs");
+const { response } = require('express');
+const { request } = require('express');
+const { User, Pet } = require('../db');
+const bcryptjs = require('bcryptjs');
 
 const getUsers = async (req = request, res = response) => {
     const users = await User.findAll({
         include: [
             {
                 model: Pet,
-                attributes: ["id", "name"],
+                attributes: ['id', 'name'],
             },
             // {
             //     model:Cuidador,
@@ -27,7 +27,7 @@ const getUser = async (req = request, res = response) => {
         include: [
             {
                 model: Pet,
-                attributes: ["id", "name"],
+                attributes: ['id', 'name'],
             },
         ],
     });
@@ -43,22 +43,14 @@ const createUser = async (req = request, res = response) => {
             email: email.toLowerCase(),
         },
     });
-
     if (user) {
         res.status(400).json(`Email ${email} en uso`);
     } else {
-        // const salt = bcryptjs.genSaltSync();
         password = bcryptjs.hashSync(password, 10);
-
         const user = await User.create({
             email: email.toLowerCase(),
             password,
         });
-
-        const { email: ems, id } = user;
-
-        // res.json({ ems, id });
-
         res.json(user);
     }
 };
@@ -74,9 +66,9 @@ const editUser = async (req = request, res = response) => {
         resto.password = password;
     }
     for (i in resto) {
-        if (i !== "role" && i !== "password") {
+        if (i !== 'role' && i !== 'password') {
             resto[i] = resto[i].toLowerCase();
-        } else if (i === "role") {
+        } else if (i === 'role') {
             resto[i] = resto[i].toUpperCase();
         }
     }
