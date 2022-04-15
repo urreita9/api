@@ -35,7 +35,7 @@ const getUser = async (req = request, res = response) => {
 };
 
 const createUser = async (req = request, res = response) => {
-  let { email, password} = req.body;
+  let { email, password } = req.body;
 
   const user = await User.findOne({
     where: {
