@@ -47,6 +47,7 @@ const createUser = async (req = request, res = response) => {
         res.status(400).json(`Email ${email} en uso`);
     } else {
         password = bcryptjs.hashSync(password, 10);
+        ///FUNCIONALACONCHADETUMADRE
         const user = await User.create({
             email: email.toLowerCase(),
             password,
