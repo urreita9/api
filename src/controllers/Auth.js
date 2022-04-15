@@ -23,7 +23,7 @@ const login = async (req = request, res = response) => {
         // Generar JWT
         const token = await generarJWT(user.id);
 
-        res.json({ user, token });
+        res.json({ token });
     } catch (error) {
         console.log(error);
         return res.status(500).json({

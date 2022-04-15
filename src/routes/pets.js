@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { check, body } = require("express-validator");
 const { existeUsuarioPorId, existePetPorId } = require("../helpers/db-validators");
-const { validarCampos } = require("../middlewares/validar-campos");
+const { validarCampos, validarJWT, validarPermisos, validarPermisosDueño } = require("../middlewares");
 const { getPets, getPet, createPet, editPet, deletePet } = require("../controllers/Pet");
 const { sizeValidator } = require("../helpers/validar-pet");
 
@@ -17,14 +17,18 @@ router.get("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(exi
 router.post(
     "/",
     [
+        validarJWT,
         check("name", "Debe tener un nombre").notEmpty(),
         check("userId", "Debe tener un usuario").notEmpty(),
         check("userId", "Debe tener un usuario").isUUID(),
         check("userId").custom(existeUsuarioPorId),
+        validarPermisosDueño,
         body("age", "Debe ser un entero menor a 25 años").if(body("age").exists()).isInt({ gt: 0, lt: 26 }),
         body("size", "No existe ese tamaño").if(body("size").exists()).custom(sizeValidator),
         body("race", "La raza debe ser un string").if(body("race").exists()).isString(),
-        body("specialFood", "Solo se aceptan valores booleanos para specialFood").if(body("specialFood").exists()).isBoolean(),
+        body("specialFood", "Solo se aceptan valores booleanos para specialFood")
+            .if(body("specialFood").exists())
+            .isBoolean(),
         validarCampos,
     ],
     createPet
@@ -34,18 +38,32 @@ router.post(
 router.put(
     "/:id",
     [
+        validarJWT,
         check("id", "ID no valido").isUUID(),
         check("id").custom(existePetPorId),
+        validarPermisosDueño,
         body("age", "Debe ser un entero menor a 25 años").if(body("age").exists()).isInt({ gt: 0, lt: 26 }),
         body("size", "No existe ese tamaño").if(body("size").exists()).custom(sizeValidator),
         body("race", "La raza debe ser un string").if(body("race").exists()).isString(),
-        body("specialFood", "Solo se aceptan valores booleanos para specialFood").if(body("specialFood").exists()).isBoolean(),
+        body("specialFood", "Solo se aceptan valores booleanos para specialFood")
+            .if(body("specialFood").exists())
+            .isBoolean(),
         validarCampos,
     ],
     editPet
 );
 
 //BORRAR UN PET
-router.delete("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(existePetPorId), validarCampos], deletePet);
+router.delete(
+    "/:id",
+    [
+        validarJWT,
+        check("id", "ID no valido").isUUID(),
+        check("id").custom(existePetPorId),
+        validarPermisosDueño,
+        validarCampos,
+    ],
+    deletePet
+);
 
 module.exports = router;

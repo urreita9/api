@@ -9,6 +9,26 @@ const validarPermisos = async (req = request, res = response, next) => {
 
     const user = await User.findByPk(id);
 
+    
+    if (validUser.id !== user.id) {
+        return res.status(400).json({ msg: "No coinciden ID token con ID que se intenta usar" });
+    }
+
+    next();
+};
+
+const validarPermisosDueño = async (req = request, res = response, next) => {
+    const validUser = req.validUser;
+    var id = req.body.userId;
+    const idPet = req.params.id;
+
+    if (!id) {
+        const pet = await Pet.findByPk(idPet);
+        id = pet.userId;
+    }
+
+    const user = await User.findByPk(id);
+
     if (validUser.id !== user.id) {
         return res.status(400).json({ msg: "No coinciden ID token con ID que se intenta usar" });
     }
@@ -18,4 +38,5 @@ const validarPermisos = async (req = request, res = response, next) => {
 
 module.exports = {
     validarPermisos,
+    validarPermisosDueño,
 };
