@@ -1,48 +1,63 @@
-const { response } = require("express");
-const { request } = require("express");
-const { User, Pet } = require("../db");
-const bcryptjs = require("bcryptjs");
+const { response } = require('express');
+const { request } = require('express');
+const { User, Pet, Caretaker } = require('../db');
+const bcryptjs = require('bcryptjs');
 
 const getUsers = async (req = request, res = response) => {
-    const users = await User.findAll({
-        include: [
-            {
-                model: Pet,
-                attributes: ["id", "name"],
-            },
-            // {
-            //     model:Cuidador,
-            //     attributes: ["id"]
-            // }
-        ],
-    });
+  const users = await User.findAll({
+    include: [
+      {
+        model: Pet,
+        attributes: ['id', 'name'],
+      },
+      {
+        model: Caretaker,
+      },
+    ],
+  });
 
-    res.json(users);
+  res.json(users);
 };
 
 const getUser = async (req = request, res = response) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const user = await User.findByPk(id, {
-        include: [
-            {
-                model: Pet,
-                attributes: ["id", "name"],
-            },
-        ],
-    });
+  const user = await User.findByPk(id, {
+    include: [
+      {
+        model: Pet,
+        attributes: ['id', 'name'],
+      },
+    ],
+  });
 
-    res.json(user);
+  res.json(user);
 };
 
 const createUser = async (req = request, res = response) => {
-    let { email, password } = req.body;
+  let { email, password, name, lastname, address, points } = req.body;
 
-    const user = await User.findOne({
-        where: {
-            email: email.toLowerCase(),
-        },
+  const user = await User.findOne({
+    where: {
+      email: email.toLowerCase(),
+    },
+  });
+
+  if (user) {
+    res.status(400).json(`Email ${email} en uso`);
+  } else {
+    const salt = bcryptjs.genSaltSync();
+    password = bcryptjs.hashSync(password, salt);
+
+    const user = await User.create({
+      email: email.toLowerCase(),
+      password,
+      name: name.toLowerCase(),
+      lastname: lastname.toLowerCase(),
+      address,
+      points,
     });
+
 
     if (user) {
         res.status(400).json(`Email ${email} en uso`);
@@ -61,11 +76,12 @@ const createUser = async (req = request, res = response) => {
 
         res.json(user);
     }
+
 };
 
 const editUser = async (req = request, res = response) => {
-    const { id } = req.params;
-    let { email, points, password, ...resto } = req.body;
+  const { id } = req.params;
+  let { email, points, password, ...resto } = req.body;
 
     const user = await User.findByPk(id);
     if (password) {
@@ -80,25 +96,26 @@ const editUser = async (req = request, res = response) => {
             resto[i] = resto[i].toUpperCase();
         }
     }
+  }
 
-    await user.update(resto);
+  await user.update(resto);
 
-    res.json(user);
+  res.json(user);
 };
 
 const deleteUser = async (req = request, res = response) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const user = await User.findByPk(id);
-    await user.destroy();
+  const user = await User.findByPk(id);
+  await user.destroy();
 
-    res.json(user);
+  res.json(user);
 };
 
 module.exports = {
-    getUsers,
-    getUser,
-    createUser,
-    editUser,
-    deleteUser,
+  getUsers,
+  getUser,
+  createUser,
+  editUser,
+  deleteUser,
 };
