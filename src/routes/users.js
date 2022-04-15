@@ -1,7 +1,8 @@
 const { Router } = require("express");
 const { check, body } = require("express-validator");
 const { existeUsuarioPorId } = require("../helpers/db-validators");
-const { validarCampos } = require("../middlewares/validar-campos");
+const { validarCampos, validarJWT, validarPermisos } = require("../middlewares");
+
 const { getUsers, getUser, createUser, editUser, deleteUser } = require("../controllers/User");
 
 const router = Router();
@@ -10,7 +11,11 @@ const router = Router();
 router.get("/", getUsers);
 
 //OBTENER UN USER POR ID
-router.get("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(existeUsuarioPorId), validarCampos], getUser);
+router.get(
+    "/:id",
+    [check("id", "ID no valido").isUUID(), check("id").custom(existeUsuarioPorId), validarCampos],
+    getUser
+);
 
 //CREAR UN USER
 router.post(
@@ -31,8 +36,10 @@ router.post(
 router.put(
     "/:id",
     [
+        validarJWT,
         check("id", "ID no valido").isUUID(),
         check("id").custom(existeUsuarioPorId),
+        validarPermisos,
         body("password", "El password tiene que tener mas de 6 letras").if(body("password").exists()).isLength({
             min: 6,
         }),
@@ -42,6 +49,16 @@ router.put(
 );
 
 //BORRAR UN USER
-router.delete("/:id", [check("id", "ID no valido").isUUID(), check("id").custom(existeUsuarioPorId), validarCampos], deleteUser);
+router.delete(
+    "/:id",
+    [
+        validarJWT,
+        check("id", "ID no valido").isUUID(),
+        check("id").custom(existeUsuarioPorId),
+        validarPermisos,
+        validarCampos,
+    ],
+    deleteUser
+);
 
 module.exports = router;

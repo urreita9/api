@@ -22,20 +22,20 @@ const getUsers = async (req = request, res = response) => {
 const getUser = async (req = request, res = response) => {
   const { id } = req.params;
 
-  const user = await User.findByPk(id, {
-    include: [
-      {
-        model: Pet,
-        attributes: ['id', 'name'],
-      },
-    ],
-  });
+    const user = await User.findByPk(id, {
+        include: [
+            {
+                model: Pet,
+                attributes: ['id', 'name'],
+            },
+        ],
+    });
 
   res.json(user);
 };
 
 const createUser = async (req = request, res = response) => {
-  let { email, password, name, lastname, address, points } = req.body;
+  let { email, password } = req.body;
 
   const user = await User.findOne({
     where: {
@@ -52,34 +52,36 @@ const createUser = async (req = request, res = response) => {
     const user = await User.create({
       email: email.toLowerCase(),
       password,
-      name: name.toLowerCase(),
-      lastname: lastname.toLowerCase(),
-      address,
-      points,
+      
     });
-
-    const { email: ems, id } = user;
-
-    res.json({ ems, id });
-  }
+    if (user) {
+        res.status(400).json(`Email ${email} en uso`);
+    } else {
+        password = bcryptjs.hashSync(password, 10);
+        const user = await User.create({
+            email: email.toLowerCase(),
+            password,
+        });
+        res.json(user);
+    }
 };
 
 const editUser = async (req = request, res = response) => {
   const { id } = req.params;
   let { email, points, password, ...resto } = req.body;
 
-  const user = await User.findByPk(id);
-  if (password) {
-    const salt = bcryptjs.genSaltSync();
-    password = bcryptjs.hashSync(password, salt);
+    const user = await User.findByPk(id);
+    if (password) {
+        password = bcryptjs.hashSync(password, 10);
 
-    resto.password = password;
-  }
-  for (i in resto) {
-    if (i !== 'role') {
-      resto[i] = resto[i].toLowerCase();
-    } else if (i === 'role') {
-      resto[i] = resto[i].toUpperCase();
+        resto.password = password;
+    }
+    for (i in resto) {
+        if (i !== 'role' && i !== 'password') {
+            resto[i] = resto[i].toLowerCase();
+        } else if (i === 'role') {
+            resto[i] = resto[i].toUpperCase();
+        }
     }
   }
 
