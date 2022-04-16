@@ -54,7 +54,9 @@ const createUser = async (req = request, res = response) => {
             password,
         });
 
-        res.json({ msg: true });
+        const { id } = user;
+
+        res.json({ msg: true, id });
     }
 };
 
