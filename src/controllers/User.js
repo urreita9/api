@@ -35,7 +35,7 @@ const getUser = async (req = request, res = response) => {
 };
 
 const createUser = async (req = request, res = response) => {
-  let { email, password, name, lastname, address, points } = req.body;
+  let { email, password } = req.body;
 
   const user = await User.findOne({
     where: {
@@ -52,10 +52,6 @@ const createUser = async (req = request, res = response) => {
     const user = await User.create({
       email: email.toLowerCase(),
       password,
-      name: name.toLowerCase(),
-      lastname: lastname.toLowerCase(),
-      address,
-      points,
     });
 
     const { email: ems, id } = user;
