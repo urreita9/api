@@ -31,11 +31,21 @@ exports.getCaretaker = async (req, res) => {
 };
 
 exports.postCaretaker = async (req, res) => {
-  const { description, rating, lat, lng, price, size, userId } = req.body;
+  const {
+    description,
+    homeDescription,
+    rating,
+    lat,
+    lng,
+    price,
+    size,
+    userId,
+  } = req.body;
 
   try {
     await Caretaker.create({
       description,
+      homeDescription,
       rating,
       lat,
       lng,

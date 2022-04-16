@@ -19,10 +19,13 @@ module.exports = (sequelize) => {
       rating: {
         type: DataTypes.FLOAT,
         defaultValue: 0,
-        set(value) {
-          const currentRating = (value + this.getDataValue('rating')) / 2;
-          this.setDataValue('rating', currentRating);
-        },
+        // get(){
+        //   return this.rating;
+        // },
+        // set(value) {
+        //   const currentRating = (value + this.getDataValue('rating')) / 2;
+        //   this.setDataValue('rating', currentRating);
+        // },
       },
       lat: {
         type: DataTypes.FLOAT,
