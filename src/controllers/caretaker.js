@@ -1,11 +1,16 @@
-const { User, Caretaker } = require('../db');
+const { User, Caretaker, Image } = require('../db');
 
 exports.getCaretakers = async (req, res) => {
   try {
     const caretakers = await Caretaker.findAll({
-      include: {
-        model: User,
-      },
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: Image,
+        },
+      ],
     });
 
     res.json(caretakers);
@@ -20,9 +25,16 @@ exports.getCaretaker = async (req, res) => {
 
   try {
     const caretaker = await User.findByPk(id, {
-      include: {
-        model: Caretaker,
-      },
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
+        },
+      ],
     });
     res.json(caretaker);
   } catch (error) {
@@ -40,24 +52,65 @@ exports.postCaretaker = async (req, res) => {
     price,
     size,
     userId,
+    images,
   } = req.body;
 
   try {
-    await Caretaker.create({
-      description,
-      homeDescription,
-      rating,
-      lat,
-      lng,
-      price,
-      size,
-      userId,
+    const [caretaker, created] = await Caretaker.findOrCreate({
+      where: {
+        description,
+        homeDescription,
+        rating,
+        lat,
+        lng,
+        price,
+        size,
+        userId,
+      },
     });
+
+    // const imagesCaretaker = await Image.findAll({
+    //   where: {
+    //     caretakerId: id,
+    //   },
+    // });
+
+    // if (!imagesCaretaker.length)
+    //   imagesCaretaker.map(async (image) => {
+    //     image.update();
+    //   });
+
+    if (created) {
+      images.map(
+        async (image) =>
+          await Image.create({ caretakerId: caretaker.id, img: image })
+      );
+    } else {
+      await Caretaker.update({
+        description,
+        homeDescription,
+        rating,
+        lat,
+        lng,
+        price,
+        size,
+      });
+
+      await Image.update(
+        { img: image },
+        { where: { caretakerId: caretaker.id } }
+      );
+    }
 
     const user = await User.findByPk(userId, {
       include: [
         {
           model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
         },
       ],
     });
