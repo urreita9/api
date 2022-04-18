@@ -1,4 +1,4 @@
-const { User, Caretaker, Image } = require('../db');
+const { User, Caretaker, Image, Question } = require('../db');
 
 exports.getCaretakers = async (req, res) => {
   try {
@@ -21,7 +21,6 @@ exports.getCaretakers = async (req, res) => {
 
 exports.getCaretaker = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
 
   try {
     const caretaker = await User.findByPk(id, {
@@ -31,6 +30,9 @@ exports.getCaretaker = async (req, res) => {
           include: [
             {
               model: Image,
+            },
+            {
+              model: Question,
             },
           ],
         },
@@ -121,20 +123,41 @@ exports.postCaretaker = async (req, res) => {
   }
 };
 
-exports.postCaretakerQuestion = (req, res) => {
+exports.postCaretakerQuestion = async (req, res) => {
   const { question } = req.body;
   const { id } = req.params;
 
-  /*
-    se agrega question a la tabla de la db del cuidador que hay que buscar por id
- */
+  try {
+    const findCaretaker = await Caretaker.findOne({ where: { userId: id } });
 
-  dataMock.questions.unshift({
-    id,
-    question,
-  });
+    await Question.create({
+      caretakerId: findCaretaker.id,
+      question,
+    });
 
-  res.json(dataMock);
+    const caretaker = await User.findByPk(id, {
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+            {
+              model: Question,
+            },
+          ],
+        },
+      ],
+      order: [[Caretaker, Question, 'question', 'ASC']],
+    });
+
+    //const caretakerMod = caretaker.questions.reverse();
+
+    res.json(caretaker);
+  } catch (error) {
+    res.json({ msg: 'Error question' });
+  }
 };
 
 exports.editCaretaker = async (req, res) => {
