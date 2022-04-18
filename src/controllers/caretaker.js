@@ -1,39 +1,19 @@
-const { User, Caretaker } = require('../db');
-
-// const dataMock = {
-//   name: 'Juan Carlos',
-//   img: 'https://images.pexels.com/photos/7840133/pexels-photo-7840133.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-//   description:
-//     'Soy Juan, me gustan los perros, cuido chicos, medianos, grandes, etc etc Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus sit, maiores neque rerum nulla aspernatur dolore provident consectetur dolores harum numquam vitae necessitatibus fugit, iusto pariatur illo eligendi autem iure.',
-//   rating: 4.5,
-//   questions: [
-//     {
-//       id: 1,
-//       question: 'Buenas, paseas perros grandes o solo chicos?',
-//       answer: 'Yes',
-//     },
-//     {
-//       id: 2,
-//       question: 'Te lo puedo dejar a las 15hs?',
-//       answer: 'Si podés pasate a las 16hs',
-//     },
-//     {
-//       id: 3,
-//       question: 'Podría llevarte la comida que come Firulais?',
-//       answer: 'No',
-//     },
-//   ],
-// };
+const { User, Caretaker, Image } = require('../db');
 
 exports.getCaretakers = async (req, res) => {
   try {
-    const caretaker = await Caretaker.findAll({
-      include: {
-        model: User,
-      },
+    const caretakers = await Caretaker.findAll({
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: Image,
+        },
+      ],
     });
 
-    res.json(caretaker);
+    res.json(caretakers);
   } catch (error) {
     res.json({ msg: 'Error get all caretakers' });
   }
@@ -45,9 +25,16 @@ exports.getCaretaker = async (req, res) => {
 
   try {
     const caretaker = await User.findByPk(id, {
-      include: {
-        model: Caretaker,
-      },
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
+        },
+      ],
     });
     res.json(caretaker);
   } catch (error) {
@@ -56,19 +43,79 @@ exports.getCaretaker = async (req, res) => {
 };
 
 exports.postCaretaker = async (req, res) => {
-  const { description, rating, lat, lng, price, size, userId } = req.body;
+  const {
+    description,
+    homeDescription,
+    rating,
+    lat,
+    lng,
+    price,
+    size,
+    userId,
+    images,
+  } = req.body;
 
   try {
-    const caretaker = await Caretaker.create({
-      description,
-      rating,
-      lat,
-      lng,
-      price,
-      size,
-      userId,
+    const [caretaker, created] = await Caretaker.findOrCreate({
+      where: {
+        description,
+        homeDescription,
+        rating,
+        lat,
+        lng,
+        price,
+        size,
+        userId,
+      },
     });
-    res.json(caretaker);
+
+    // const imagesCaretaker = await Image.findAll({
+    //   where: {
+    //     caretakerId: id,
+    //   },
+    // });
+
+    // if (!imagesCaretaker.length)
+    //   imagesCaretaker.map(async (image) => {
+    //     image.update();
+    //   });
+
+    if (created) {
+      images.map(
+        async (image) =>
+          await Image.create({ caretakerId: caretaker.id, img: image })
+      );
+    } else {
+      await Caretaker.update({
+        description,
+        homeDescription,
+        rating,
+        lat,
+        lng,
+        price,
+        size,
+      });
+
+      await Image.update(
+        { img: image },
+        { where: { caretakerId: caretaker.id } }
+      );
+    }
+
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
+        },
+      ],
+    });
+
+    res.json(user);
   } catch (error) {
     res.json({ msg: 'Error post caretaker' });
   }
@@ -88,4 +135,59 @@ exports.postCaretakerQuestion = (req, res) => {
   });
 
   res.json(dataMock);
+};
+
+exports.editCaretaker = async (req, res) => {
+  const { id } = req.params;
+  const { description, lat, lng, price, size } = req.body;
+
+  try {
+    const caretaker = await Caretaker.findOne({
+      where: {
+        userId: id,
+      },
+    });
+
+    await caretaker.update({
+      description,
+      lat,
+      lng,
+      price,
+      size,
+    });
+
+    const user = await User.findByPk(id, {
+      include: [
+        {
+          model: Caretaker,
+        },
+      ],
+    });
+
+    res.json(user);
+  } catch (error) {
+    res.json({ msg: 'Error edit caretaker' });
+  }
+};
+
+exports.deleteCaretaker = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await Caretaker.destroy({
+      where: {
+        userId: id,
+      },
+    });
+
+    const caretakers = await Caretaker.findAll({
+      include: {
+        model: User,
+      },
+    });
+
+    res.json(caretakers);
+  } catch (error) {
+    res.json({ msg: 'Error delete caretaker' });
+  }
 };

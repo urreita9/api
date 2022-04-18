@@ -62,7 +62,7 @@ const createUser = async (req = request, res = response) => {
     });
 
     if (user) {
-        res.status(400).json({ msg: `Email ${email} en uso` });
+        res.status(400).json(`Email ${email} en uso`);
     } else {
         const salt = bcryptjs.genSaltSync();
         password = bcryptjs.hashSync(password, salt);
@@ -72,9 +72,14 @@ const createUser = async (req = request, res = response) => {
             password,
         });
 
-        const { id } = user;
-
-        res.json({ msg: true, id });
+        if (user) {
+            res.status(400).json({ msg: `Email ${email} en uso` });
+        } else {
+            const salt = bcryptjs.genSaltSync();
+            password = bcryptjs.hashSync(password, salt);
+            const { id } = user;
+            res.json({ msg: true, id });
+        }
     }
 };
 

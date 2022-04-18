@@ -10,32 +10,41 @@ module.exports = (sequelize) => {
       },
       description: {
         type: DataTypes.TEXT,
-        isNull: false,
+        allowNull: false,
+      },
+      homeDescription: {
+        type: DataTypes.TEXT,
+        allowNull: false,
       },
       rating: {
         type: DataTypes.FLOAT,
-        isNull: false,
-        min: 1,
-        max: 5,
+        defaultValue: 0,
+        // get(){
+        //   return this.rating;
+        // },
+        // set(value) {
+        //   const currentRating = (value + this.getDataValue('rating')) / 2;
+        //   this.setDataValue('rating', currentRating);
+        // },
       },
       lat: {
         type: DataTypes.FLOAT,
-        isNull: false,
+        allowNull: false,
       },
       lng: {
         type: DataTypes.FLOAT,
-        isNull: false,
+        allowNull: false,
       },
       price: {
         type: DataTypes.INTEGER,
-        isNull: false,
+        allowNull: false,
         min: 0,
       },
       size: {
         type: DataTypes.INTEGER,
         min: 0,
         max: 2,
-        isNull: false,
+        allowNull: false,
       },
     },
     { logging: false, timestamps: false }
