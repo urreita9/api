@@ -69,7 +69,7 @@ sequelize.models = Object.fromEntries(capsEntries);
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
 
-const { User, Pet, Caretaker, Image } = sequelize.models;
+const { User, Pet, Caretaker, Image, Question } = sequelize.models;
 
 // Aca vendrian las relaciones
 Pet.belongsTo(User);
@@ -79,8 +79,12 @@ User.hasMany(Pet);
 // Type.belongsToMany(Pokemon, { through: 'Pokemon_Type' });
 User.hasOne(Caretaker);
 Caretaker.belongsTo(User);
+
 Caretaker.hasMany(Image);
 Image.belongsTo(Caretaker);
+
+Caretaker.hasMany(Question);
+Question.belongsTo(Caretaker);
 
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
