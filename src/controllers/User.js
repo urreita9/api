@@ -34,6 +34,24 @@ const getUser = async (req = request, res = response) => {
     res.json(user);
 };
 
+const getUserJWT = async (req = request, res = response) => {
+    let { id } = req.params;
+    if (!id) {
+        id = req.header('uid');
+    }
+
+    const user = await User.findByPk(id, {
+        include: [
+            {
+                model: Pet,
+                attributes: ['id', 'name'],
+            },
+        ],
+    });
+
+    res.json(user);
+};
+
 const createUser = async (req = request, res = response) => {
     let { email, password } = req.body;
 
@@ -44,7 +62,7 @@ const createUser = async (req = request, res = response) => {
     });
 
     if (user) {
-        res.status(400).json(`Email ${email} en uso`);
+        res.status(400).json({ msg: `Email ${email} en uso` });
     } else {
         const salt = bcryptjs.genSaltSync();
         password = bcryptjs.hashSync(password, salt);
@@ -94,6 +112,7 @@ const deleteUser = async (req = request, res = response) => {
 module.exports = {
     getUsers,
     getUser,
+    getUserJWT,
     createUser,
     editUser,
     deleteUser,
