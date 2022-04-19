@@ -58,6 +58,7 @@ router.put(
         body('password', 'El password tiene que tener mas de 6 letras').if(body('password').exists()).isLength({
             min: 6,
         }),
+        body('img', 'La img debe ser una URL').if(body('img').exists()).isURL(),
         validarCampos,
     ],
     editUser
