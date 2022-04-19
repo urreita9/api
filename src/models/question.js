@@ -12,6 +12,10 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
+      answered: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     { logging: false, timestamps: false }
   );
