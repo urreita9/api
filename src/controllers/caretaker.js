@@ -1,4 +1,4 @@
-const { User, Caretaker, Image, Question } = require('../db');
+const { User, Caretaker, Image, Question, Answer } = require('../db');
 
 exports.getCaretakers = async (req, res) => {
   try {
@@ -33,6 +33,11 @@ exports.getCaretaker = async (req, res) => {
             },
             {
               model: Question,
+              include: [
+                {
+                  model: Answer,
+                },
+              ],
             },
           ],
         },
@@ -41,6 +46,27 @@ exports.getCaretaker = async (req, res) => {
     res.json(caretaker);
   } catch (error) {
     res.json({ msg: 'Error get caretaker by id' });
+  }
+};
+
+exports.getQuestions = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const caretaker = await Caretaker.findOne({
+      where: {
+        userId: id,
+      },
+      include: [
+        {
+          model: Question,
+        },
+      ],
+    });
+
+    res.json(caretaker.questions);
+  } catch (error) {
+    res.json(error);
   }
 };
 
@@ -152,11 +178,47 @@ exports.postCaretakerQuestion = async (req, res) => {
       order: [[Caretaker, Question, 'question', 'ASC']],
     });
 
-    //const caretakerMod = caretaker.questions.reverse();
-
     res.json(caretaker);
   } catch (error) {
     res.json({ msg: 'Error question' });
+  }
+};
+
+exports.postAnswer = async (req, res) => {
+  const { id, answer } = req.body;
+
+  try {
+    await Answer.create({ questionId: id, answer });
+
+    await Question.update(
+      { answered: true },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    const caretaker = await User.findByPk(id, {
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+            {
+              model: Question,
+            },
+          ],
+        },
+      ],
+      //order: [[Caretaker, Question, 'question', 'ASC']],
+    });
+
+    res.json(caretaker);
+  } catch (error) {
+    res.json(error);
   }
 };
 
