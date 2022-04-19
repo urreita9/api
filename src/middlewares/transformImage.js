@@ -28,7 +28,7 @@ const transformImage = async (req, res, next) => {
     async (image) => await cloudinary.uploader.upload(image)
   );
 
-  console.log('tatta', uploadedResponse);
+  //console.log('tatta', uploadedResponse);
 
   const promisesImages = await Promise.all(uploadedResponse);
 
@@ -37,7 +37,7 @@ const transformImage = async (req, res, next) => {
     images: promisesImages.map((image) => image.secure_url),
   };
 
-  console.log(req.body);
+  //console.log(req.body);
 
   next();
 };
