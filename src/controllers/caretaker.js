@@ -99,13 +99,19 @@ exports.postCaretaker = async (req, res) => {
 exports.postCaretakerQuestion = async (req, res) => {
   const { question } = req.body;
   const { id } = req.params;
+  const uid = req.header('uid');
+
+  //console.log(question, id, uid);
 
   try {
     const findCaretaker = await Caretaker.findOne({ where: { userId: id } });
 
+    //console.log(findCaretaker);
+
     const questionCreated = await Question.create({
       caretakerId: findCaretaker.id,
       question,
+      questioner: uid,
     });
 
     const caretaker = await User.findByPk(id, {
@@ -140,6 +146,7 @@ exports.postCaretakerQuestion = async (req, res) => {
 
 exports.postAnswer = async (req, res) => {
   const { id, answer } = req.body;
+  const userId = req.params;
 
   try {
     await Answer.create({ questionId: id, answer });
@@ -153,7 +160,11 @@ exports.postAnswer = async (req, res) => {
       }
     );
 
-    const caretaker = await User.findByPk(id, {
+    const question = await Question.findOne({ where: { id } });
+
+    //const user = await User.findOne({ where: { id: question.questioner } });
+
+    const caretaker = await User.findByPk(userId.id, {
       include: [
         {
           model: Caretaker,
@@ -168,6 +179,16 @@ exports.postAnswer = async (req, res) => {
         },
       ],
       //order: [[Caretaker, Question, 'question', 'ASC']],
+    });
+
+    //console.log(question, caretaker);
+
+    await transporter.sendMail({
+      from: '<pettrip.app@gmail.com>',
+      //to: user.email,
+      to: 'matiasangelani2@gmail.com',
+      subject: `${caretaker.name} te ha respondido`,
+      text: `${question.question}: ${answer}`,
     });
 
     res.json(caretaker);
