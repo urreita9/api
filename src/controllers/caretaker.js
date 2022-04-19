@@ -1,4 +1,5 @@
 const { User, Caretaker, Image, Question, Answer } = require('../db');
+const { transporter } = require('../utils/nodemailer');
 
 exports.getCaretakers = async (req, res) => {
   try {
@@ -156,7 +157,7 @@ exports.postCaretakerQuestion = async (req, res) => {
   try {
     const findCaretaker = await Caretaker.findOne({ where: { userId: id } });
 
-    await Question.create({
+    const questionCreated = await Question.create({
       caretakerId: findCaretaker.id,
       question,
     });
@@ -176,6 +177,15 @@ exports.postCaretakerQuestion = async (req, res) => {
         },
       ],
       order: [[Caretaker, Question, 'question', 'ASC']],
+    });
+
+    await transporter.sendMail({
+      from: '<pettrip.app@gmail.com>', // sender address
+      to: caretaker.email,
+      //to: 'matiasangelani2@gmail.com', // list of receivers
+      subject: 'Te han hecho una pregunta', // Subject line
+      text: questionCreated.question, // plain text body
+      //html: '<b>Hello world?</b>', // html body
     });
 
     res.json(caretaker);
