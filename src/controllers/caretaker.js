@@ -72,64 +72,10 @@ exports.getQuestions = async (req, res) => {
 };
 
 exports.postCaretaker = async (req, res) => {
-  const {
-    description,
-    homeDescription,
-    rating,
-    lat,
-    lng,
-    price,
-    size,
-    userId,
-    images,
-  } = req.body;
+  const { userId } = req.body;
 
   try {
-    const [caretaker, created] = await Caretaker.findOrCreate({
-      where: {
-        description,
-        homeDescription,
-        rating,
-        lat,
-        lng,
-        price,
-        size,
-        userId,
-      },
-    });
-
-    // const imagesCaretaker = await Image.findAll({
-    //   where: {
-    //     caretakerId: id,
-    //   },
-    // });
-
-    // if (!imagesCaretaker.length)
-    //   imagesCaretaker.map(async (image) => {
-    //     image.update();
-    //   });
-
-    if (created) {
-      images.map(
-        async (image) =>
-          await Image.create({ caretakerId: caretaker.id, img: image })
-      );
-    } else {
-      await Caretaker.update({
-        description,
-        homeDescription,
-        rating,
-        lat,
-        lng,
-        price,
-        size,
-      });
-
-      await Image.update(
-        { img: image },
-        { where: { caretakerId: caretaker.id } }
-      );
-    }
+    await Caretaker.create({ ...req.body });
 
     const user = await User.findByPk(userId, {
       include: [
@@ -176,16 +122,14 @@ exports.postCaretakerQuestion = async (req, res) => {
           ],
         },
       ],
-      order: [[Caretaker, Question, 'question', 'ASC']],
+      //order: [[Caretaker, Question, 'question', 'ASC']],
     });
 
     await transporter.sendMail({
-      from: '<pettrip.app@gmail.com>', // sender address
+      from: '<pettrip.app@gmail.com>',
       to: caretaker.email,
-      //to: 'matiasangelani2@gmail.com', // list of receivers
-      subject: 'Te han hecho una pregunta', // Subject line
-      text: questionCreated.question, // plain text body
-      //html: '<b>Hello world?</b>', // html body
+      subject: 'Te han hecho una pregunta',
+      text: questionCreated.question,
     });
 
     res.json(caretaker);
@@ -234,7 +178,6 @@ exports.postAnswer = async (req, res) => {
 
 exports.editCaretaker = async (req, res) => {
   const { id } = req.params;
-  const { description, lat, lng, price, size } = req.body;
 
   try {
     const caretaker = await Caretaker.findOne({
@@ -243,18 +186,17 @@ exports.editCaretaker = async (req, res) => {
       },
     });
 
-    await caretaker.update({
-      description,
-      lat,
-      lng,
-      price,
-      size,
-    });
+    await caretaker.update({ ...req.body });
 
     const user = await User.findByPk(id, {
       include: [
         {
           model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
         },
       ],
     });
