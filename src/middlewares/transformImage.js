@@ -1,4 +1,4 @@
-const { cloudinary } = require('../cloudinary');
+const { cloudinary } = require('../utils/cloudinary');
 
 // PASARLO A MIDDLEWARE PARA IMG DE USER
 // const transformImage = async (req, res, next) => {
