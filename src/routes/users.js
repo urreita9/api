@@ -9,13 +9,14 @@ const {
 } = require("../middlewares");
 
 const {
-  getUsers,
-  getUser,
-  getUserJWT,
-  createUser,
-  editUser,
-  deleteUser,
-} = require("../controllers/User");
+    getUsers,
+    getUser,
+    getUserJWT,
+    createUser,
+    editUser,
+    deleteUser,
+    checkPassword,
+} = require('../controllers/User');
 
 const router = Router();
 
@@ -66,21 +67,20 @@ router.post(
 
 //EDITAR UN USER
 router.put(
-  "/:id",
-  [
-    validarJWT,
-    check("id", "ID no valido").isUUID(),
-    check("id").custom(existeUsuarioPorId),
-    validarCampos,
-    validarPermisos,
-    body("password", "El password tiene que tener mas de 6 letras")
-      .if(body("password").exists())
-      .isLength({
-        min: 6,
-      }),
-    validarCampos,
-  ],
-  editUser
+    '/:id',
+    [
+        validarJWT,
+        check('id', 'ID no valido').isUUID(),
+        check('id').custom(existeUsuarioPorId),
+        validarCampos,
+        validarPermisos,
+        body('password', 'El password tiene que tener mas de 6 letras').if(body('password').exists()).isLength({
+            min: 6,
+        }),
+        body('img', 'La img debe ser una URL').if(body('img').exists()).isURL(),
+        validarCampos,
+    ],
+    editUser
 );
 
 //BORRAR UN USER
@@ -95,6 +95,20 @@ router.delete(
     validarCampos,
   ],
   deleteUser
+);
+
+router.post(
+    '/check/password',
+    [
+        validarJWT,
+        check('uid', 'ID no valido').isUUID(),
+        check('uid').custom(existeUsuarioPorId),
+        validarCampos,
+        validarPermisosProfile,
+        check('password', 'Se necesita contraseña').not().isEmpty(),
+        validarCampos,
+    ],
+    checkPassword
 );
 
 module.exports = router;
