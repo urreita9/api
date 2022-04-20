@@ -27,6 +27,7 @@ router.post(
         body('age', 'Debe ser un entero menor a 25 años').if(body('age').exists()).isInt({ gt: 0, lt: 26 }),
         body('size', 'No existe ese tamaño').if(body('size').exists()).custom(sizeValidator),
         body('race', 'La raza debe ser un string').if(body('race').exists()).isString(),
+        body('img', 'La raza debe ser un string').if(body('img').exists()).isURL(),
         body('specialFood', 'Solo se aceptan valores booleanos para specialFood')
             .if(body('specialFood').exists())
             .isBoolean(),
@@ -47,6 +48,7 @@ router.put(
         body('age', 'Debe ser un entero menor a 25 años').if(body('age').exists()).isInt({ gt: 0, lt: 26 }),
         body('size', 'No existe ese tamaño').if(body('size').exists()).custom(sizeValidator),
         body('race', 'La raza debe ser un string').if(body('race').exists()).isString(),
+        body('img', 'La raza debe ser un string').if(body('img').exists()).isURL(),
         body('specialFood', 'Solo se aceptan valores booleanos para specialFood')
             .if(body('specialFood').exists())
             .isBoolean(),

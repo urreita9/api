@@ -34,7 +34,7 @@ const createPet = async (req = request, res = response) => {
     const body = req.body;
 
     for (i in body) {
-        if (i !== "size" && typeof body[i] === "string") {
+        if (i !== "size" && typeof body[i] === "string" && i!== "img") {
             body[i] = body[i].toLowerCase();
         } else if (i === "size") {
             body[i] = body[i].toUpperCase();

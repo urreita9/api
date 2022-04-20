@@ -1,10 +1,10 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize, DataTypes } = require('sequelize');
 // Exportamos una funcion que define el modelo
 // Luego le injectamos la conexion a sequelize.
 module.exports = (sequelize) => {
     //defino el modelo
     sequelize.define(
-        "pet",
+        'pet',
         {
             id: {
                 type: Sequelize.UUID,
@@ -21,12 +21,12 @@ module.exports = (sequelize) => {
             },
             race: {
                 type: DataTypes.STRING,
-                defaultValue: "none",
+                defaultValue: 'none',
             },
             size: {
-                type: DataTypes.ENUM("SMALL", "MEDIUM", "BIG"),
+                type: DataTypes.ENUM('SMALL', 'MEDIUM', 'BIG'),
                 allowNull: false,
-                defaultValue: "BIG",
+                defaultValue: 'BIG',
             },
             specialFood: {
                 type: DataTypes.BOOLEAN,
@@ -35,6 +35,8 @@ module.exports = (sequelize) => {
             img: {
                 type: DataTypes.STRING(1000),
                 allowNull: true,
+                defaultValue:
+                    'https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/65761296352685.5eac4787a4720.jpg',
             },
         },
         { logging: false, timestamps: false }

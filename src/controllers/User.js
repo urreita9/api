@@ -44,7 +44,6 @@ const getUserJWT = async (req = request, res = response) => {
         include: [
             {
                 model: Pet,
-                attributes: ['id', 'name'],
             },
         ],
     });
@@ -92,13 +91,12 @@ const editUser = async (req = request, res = response) => {
             },
         ],
     });
-	
+
     if (password) {
         password = bcryptjs.hashSync(password, 10);
 
         resto.password = password;
     }
-
 
     for (i in resto) {
         if (i !== 'role' && i !== 'password') {
@@ -121,6 +119,17 @@ const deleteUser = async (req = request, res = response) => {
     res.json(user);
 };
 
+const checkPassword = async (req = request, res = response) => {
+    const { password } = req.body;
+    const id = req.header('uid');
+
+    const user = await User.findByPk(id);
+
+    const validPassword = await bcryptjs.compare(password, user.password);
+
+    return res.json(validPassword);
+};
+
 module.exports = {
     getUsers,
     getUser,
@@ -128,4 +137,5 @@ module.exports = {
     createUser,
     editUser,
     deleteUser,
+    checkPassword,
 };

@@ -3,7 +3,15 @@ const { check, body } = require('express-validator');
 const { existeUsuarioPorId } = require('../helpers/db-validators');
 const { validarCampos, validarJWT, validarPermisos, validarPermisosProfile } = require('../middlewares');
 
-const { getUsers, getUser, getUserJWT, createUser, editUser, deleteUser } = require('../controllers/User');
+const {
+    getUsers,
+    getUser,
+    getUserJWT,
+    createUser,
+    editUser,
+    deleteUser,
+    checkPassword,
+} = require('../controllers/User');
 
 const router = Router();
 
@@ -76,6 +84,20 @@ router.delete(
         validarCampos,
     ],
     deleteUser
+);
+
+router.post(
+    '/check/password',
+    [
+        validarJWT,
+        check('uid', 'ID no valido').isUUID(),
+        check('uid').custom(existeUsuarioPorId),
+        validarCampos,
+        validarPermisosProfile,
+        check('password', 'Se necesita contraseña').not().isEmpty(),
+        validarCampos,
+    ],
+    checkPassword
 );
 
 module.exports = router;
