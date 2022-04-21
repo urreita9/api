@@ -15,13 +15,14 @@ const {
 	createUser,
 	editUser,
 	deleteUser,
+	checkPassword,
 } = require('../controllers/User');
 
 const router = Router();
 
 //OBTENER TODOS LOS USERS
 router.get('/', getUsers);
-//
+
 //OBTENER UN USER POR ID
 router.get(
 	'/:id',
@@ -51,6 +52,8 @@ router.get(
 router.post(
 	'/',
 	[
+		check('name', 'Debe tener un nombre').not().isEmpty(),
+		check('lastname', 'Debe tener un apellido').not().isEmpty(),
 		check('email', 'El email es obligatorio').not().isEmpty(),
 		check('email', 'El email no es valido').isEmail(),
 		check('password', 'La constraseña es obligatoria').not().isEmpty(),
@@ -76,6 +79,7 @@ router.put(
 			.isLength({
 				min: 6,
 			}),
+		body('img', 'La img debe ser una URL').if(body('img').exists()).isURL(),
 		validarCampos,
 	],
 	editUser
@@ -93,6 +97,20 @@ router.delete(
 		validarCampos,
 	],
 	deleteUser
+);
+
+router.post(
+	'/check/password',
+	[
+		validarJWT,
+		check('uid', 'ID no valido').isUUID(),
+		check('uid').custom(existeUsuarioPorId),
+		validarCampos,
+		validarPermisosProfile,
+		check('password', 'Se necesita contraseña').not().isEmpty(),
+		validarCampos,
+	],
+	checkPassword
 );
 
 module.exports = router;

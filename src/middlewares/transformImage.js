@@ -1,4 +1,4 @@
-const { cloudinary } = require('../cloudinary');
+const { cloudinary } = require('../utils/cloudinary');
 
 // PASARLO A MIDDLEWARE PARA IMG DE USER
 // const transformImage = async (req, res, next) => {
@@ -20,11 +20,15 @@ const transformImage = async (req, res, next) => {
   let caretaker = req.body;
   let { images } = caretaker;
 
-  const uploadedResponse = images.map(
+  // if(!images.length){
+  //   return res.json()
+  // }
+
+  const uploadedResponse = images?.map(
     async (image) => await cloudinary.uploader.upload(image)
   );
 
-  console.log('tatta', uploadedResponse);
+  //console.log('tatta', uploadedResponse);
 
   const promisesImages = await Promise.all(uploadedResponse);
 
@@ -33,7 +37,7 @@ const transformImage = async (req, res, next) => {
     images: promisesImages.map((image) => image.secure_url),
   };
 
-  console.log(req.body);
+  //console.log(req.body);
 
   next();
 };
