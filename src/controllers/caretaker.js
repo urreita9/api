@@ -232,6 +232,33 @@ exports.deleteCaretaker = async (req, res) => {
   const { id } = req.params;
 
   try {
+    const caretaker = await Caretaker.findOne({
+      where: {
+        userId: id,
+      },
+    });
+
+    const questions = await Question.findAll({
+      where: {
+        caretakerId: caretaker.id,
+      },
+    });
+
+    questions.map(
+      async (question) =>
+        await Answer.destroy({
+          where: {
+            questionId: question.id,
+          },
+        })
+    );
+
+    await Question.destroy({
+      where: {
+        caretakerId: caretaker.id,
+      },
+    });
+
     await Caretaker.destroy({
       where: {
         userId: id,
