@@ -1,4 +1,5 @@
 const express = require('express');
+const mercadopago = require('mercadopago');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
@@ -8,15 +9,15 @@ const routes = require('./routes/index.js');
 require('./db.js');
 //cambio para commitear a heroku
 const server = express();
-server.use(cors());
-server.name = 'API';
 
+server.name = 'API';
+server.use(cors());
 server.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 server.use(bodyParser.json({ limit: '50mb' }));
 server.use(cookieParser());
 server.use(morgan('dev'));
 server.use((req, res, next) => {
-	res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
+	// res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
 	res.header('Access-Control-Allow-Credentials', 'true');
 	res.header(
 		'Access-Control-Allow-Headers',
