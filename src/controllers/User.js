@@ -26,6 +26,9 @@ const getUser = async (req = request, res = response) => {
             {
                 model: Pet,
             },
+            {
+                model: Caretaker,
+            },
         ],
     });
 
@@ -42,6 +45,9 @@ const getUserJWT = async (req = request, res = response) => {
         include: [
             {
                 model: Pet,
+            },
+            {
+                model: Caretaker,
             },
         ],
     });
