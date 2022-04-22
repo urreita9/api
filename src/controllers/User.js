@@ -91,9 +91,18 @@ const editUser = async (req = request, res = response) => {
   const { id } = req.params;
   let { email, points, password, ...resto } = req.body;
 
-  const user = await User.findByPk(id);
-  if (password) {
-    password = bcryptjs.hashSync(password, 10);
+    const user = await User.findByPk(id, {
+        include: [
+            {
+                model: Pet,
+            },
+            {
+                model: Caretaker,
+            },
+        ],
+    });
+    if (password) {
+        password = bcryptjs.hashSync(password, 10);
 
     resto.password = password;
   }
