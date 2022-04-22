@@ -1,13 +1,13 @@
-const { response } = require("express");
-const { request } = require("express");
-const { User, Pet } = require("../db");
+const { response } = require('express');
+const { request } = require('express');
+const { User, Pet, Caretaker } = require('../db');
 
 const getPets = async (req = request, res = response) => {
     const pets = await Pet.findAll({
         include: [
             {
                 model: User,
-                attributes: ["id", "name"],
+                attributes: ['id', 'name'],
             },
         ],
     });
@@ -22,7 +22,7 @@ const getPet = async (req = request, res = response) => {
         include: [
             {
                 model: User,
-                attributes: ["id", "name"],
+                attributes: ['id', 'name'],
             },
         ],
     });
@@ -32,17 +32,30 @@ const getPet = async (req = request, res = response) => {
 
 const createPet = async (req = request, res = response) => {
     const body = req.body;
+    const { userId } = req.body;
 
     for (i in body) {
-        if (i !== "size" && typeof body[i] === "string" && i!== "img") {
+        if (i !== 'size' && typeof body[i] === 'string' && i !== 'img') {
             body[i] = body[i].toLowerCase();
-        } else if (i === "size") {
+        } else if (i === 'size') {
             body[i] = body[i].toUpperCase();
         }
     }
     const pet = await Pet.create(body);
 
-    res.json(pet);
+    console.log(userId);
+    const user = await User.findByPk(userId, {
+        include: [
+            {
+                model: Pet,
+            },
+            {
+                model: Caretaker,
+            },
+        ],
+    });
+
+    res.json({ pet, user });
 };
 
 const editPet = async (req = request, res = response) => {
@@ -52,9 +65,9 @@ const editPet = async (req = request, res = response) => {
     const pet = await Pet.findByPk(idk);
 
     for (i in body) {
-        if (i !== "size" && typeof body[i] === "string") {
+        if (i !== 'size' && typeof body[i] === 'string') {
             body[i] = body[i].toLowerCase();
-        } else if (i === "size") {
+        } else if (i === 'size') {
             body[i] = body[i].toUpperCase();
         }
     }
