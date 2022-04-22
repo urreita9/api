@@ -72,10 +72,37 @@ exports.getQuestions = async (req, res) => {
 };
 
 exports.postCaretaker = async (req, res) => {
-  const { userId } = req.body;
+  const { userId, images } = req.body;
 
   try {
-    await Caretaker.create({ ...req.body });
+    const userExists = await User.findByPk(userId, {
+      include: [
+        {
+          model: Caretaker,
+          include: [
+            {
+              model: Image,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (userExists.caretaker)
+      return res
+        .status(400)
+        .json({ msg: 'User aldready a caretaker', userExists });
+
+    const caretaker = await Caretaker.create({ ...req.body });
+
+    const myImages = await Promise.all(
+      images.map(async (image) => {
+        await Image.create({ caretakerId: caretaker.id, img: image });
+      })
+    );
+
+    console.log('MY IMAGES ', myImages);
+    // // console.log('CARETAKER', caretaker.dataValues);
 
     const user = await User.findByPk(userId, {
       include: [
@@ -89,9 +116,11 @@ exports.postCaretaker = async (req, res) => {
         },
       ],
     });
-
+    // // console.log('CONTROLADOR USER CARETAKER', user.caretaker.dataValues);
+    console.log(' ESTAN LAS IMAGENES', user);
     res.json(user);
   } catch (error) {
+    console.log(error);
     res.json({ msg: 'Error post caretaker' });
   }
 };
