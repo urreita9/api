@@ -3,11 +3,11 @@ const router = Router();
 
 const {
 	createOperation,
-	getOperationsById,
+	getOperations,
 	editOperation,
 } = require('../controllers/operations');
 
-router.get('/:id', getOperationsById);
+router.get('/:id', getOperations);
 router.put('/', editOperation);
 router.post('/', createOperation);
 

@@ -8,7 +8,7 @@ mercadopago.configure({
 	access_token: process.env.TOKEN_PROD_TEST,
 });
 
-const getOperationsById = async (req, res) => {
+const getOperations = async (req, res) => {
 	const { id } = req.params;
 	const { user } = req.query; // user true?=> userId ////// user false?=> caretakerId
 	try {
@@ -84,11 +84,11 @@ const createOperation = async (req, res) => {
 };
 
 const editOperation = async (req, res) => {
-	const { id } = req.body;
+	const { idOperation, idPayment } = req.body;
 
 	try {
-		const status = await axios.get(
-			`https://api.mercadopago.com/merchant_orders/${id}`,
+		const { data } = await axios.get(
+			`https://api.mercadopago.com/merchant_orders/${idPayment}`,
 			{
 				headers: {
 					Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
@@ -96,7 +96,18 @@ const editOperation = async (req, res) => {
 			}
 		);
 
-		console.log('EDIT OP', status.data);
+		// console.log('data', data);
+		const operation = await Operation.findByPk(idOperation);
+
+		if (!operation) return res.status.json({ msg: 'Operation does not exist' });
+
+		const updatedOperation = await operation.update({
+			...operation,
+			status: data.payments[0].status,
+		});
+
+		// console.log('UPDATED OP', updatedOperation);
+		res.json(updatedOperation);
 	} catch (error) {
 		console.log(error);
 	}
@@ -114,7 +125,7 @@ const editOperation = async (req, res) => {
 
 module.exports = {
 	createOperation,
-	getOperationsById,
+	getOperations,
 	editOperation,
 };
 
