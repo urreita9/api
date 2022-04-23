@@ -1,43 +1,49 @@
-const { cloudinary } = require('../cloudinary');
+const { cloudinary } = require('../utils/cloudinary');
 
 // PASARLO A MIDDLEWARE PARA IMG DE USER
-// const transformImage = async (req, res, next) => {
-//   let user = req.body;
-//   const { image } = user;
+const transformImageOne = async (req, res, next) => {
+    let { img } = req.body;
 
-//   const uploadedResponse = await cloudinary.uploader.upload(image);
+    if (!img) {
+        next();
+    } else {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
 
-//   req.body = {
-//     ...req.body,
-//     image: uploadedResponse.secure_url,
-//   };
+        req.body = {
+            ...req.body,
+            img: uploadedResponse.secure_url,
+        };
 
-//   next();
-// };
+        next();
+    }
+};
 
 // middleware para images de caretaker
 const transformImage = async (req, res, next) => {
-  let caretaker = req.body;
-  let { images } = caretaker;
+    let caretaker = req.body;
+    let { images } = caretaker;
 
-  const uploadedResponse = images.map(
-    async (image) => await cloudinary.uploader.upload(image)
-  );
+    // if(!images.length){
+    //   return res.json()
+    // }
 
-  console.log('tatta', uploadedResponse);
+    const uploadedResponse = images?.map(async (image) => await cloudinary.uploader.upload(image));
 
-  const promisesImages = await Promise.all(uploadedResponse);
+    //console.log('tatta', uploadedResponse);
 
-  req.body = {
-    ...req.body,
-    images: promisesImages.map((image) => image.secure_url),
-  };
+    const promisesImages = await Promise.all(uploadedResponse);
 
-  console.log(req.body);
+    req.body = {
+        ...req.body,
+        images: promisesImages.map((image) => image.secure_url),
+    };
 
-  next();
+    //console.log(req.body);
+
+    next();
 };
 
 module.exports = {
-  transformImage,
+    transformImage,
+    transformImageOne,
 };

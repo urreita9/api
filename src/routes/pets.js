@@ -4,6 +4,7 @@ const { existeUsuarioPorId, existePetPorId } = require('../helpers/db-validators
 const { validarCampos, validarJWT, validarPermisos, validarPermisosDueño } = require('../middlewares');
 const { getPets, getPet, createPet, editPet, deletePet } = require('../controllers/Pet');
 const { sizeValidator } = require('../helpers/validar-pet');
+const { transformImageOne } = require('../middlewares/transformImage');
 
 const router = Router();
 
@@ -27,10 +28,12 @@ router.post(
         body('age', 'Debe ser un entero menor a 25 años').if(body('age').exists()).isInt({ gt: 0, lt: 26 }),
         body('size', 'No existe ese tamaño').if(body('size').exists()).custom(sizeValidator),
         body('race', 'La raza debe ser un string').if(body('race').exists()).isString(),
+
         body('specialFood', 'Solo se aceptan valores booleanos para specialFood')
             .if(body('specialFood').exists())
             .isBoolean(),
         validarCampos,
+        transformImageOne,
     ],
     createPet
 );
@@ -47,6 +50,7 @@ router.put(
         body('age', 'Debe ser un entero menor a 25 años').if(body('age').exists()).isInt({ gt: 0, lt: 26 }),
         body('size', 'No existe ese tamaño').if(body('size').exists()).custom(sizeValidator),
         body('race', 'La raza debe ser un string').if(body('race').exists()).isString(),
+        body('img', 'La raza debe ser un string').if(body('img').exists()).isURL(),
         body('specialFood', 'Solo se aceptan valores booleanos para specialFood')
             .if(body('specialFood').exists())
             .isBoolean(),
