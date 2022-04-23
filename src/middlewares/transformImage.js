@@ -4,16 +4,18 @@ const { cloudinary } = require('../utils/cloudinary');
 const transformImageOne = async (req, res, next) => {
     let { img } = req.body;
 
-    const uploadedResponse = await cloudinary.uploader.upload(img);
+    if (!img) {
+        next();
+    } else {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
 
-    // const url = await Promise.all(uploadedResponse);
+        req.body = {
+            ...req.body,
+            img: uploadedResponse.secure_url,
+        };
 
-    req.body = {
-        ...req.body,
-        img: uploadedResponse.secure_url,
-    };
-
-    next();
+        next();
+    }
 };
 
 // middleware para images de caretaker
