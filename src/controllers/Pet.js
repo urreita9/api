@@ -43,25 +43,13 @@ const createPet = async (req = request, res = response) => {
     }
     const pet = await Pet.create(body);
 
-    console.log(userId);
-    const user = await User.findByPk(userId, {
-        include: [
-            {
-                model: Pet,
-            },
-            {
-                model: Caretaker,
-            },
-        ],
-    });
-
-    res.json({ pet, user });
+    res.json(pet);
 };
 
 const editPet = async (req = request, res = response) => {
     const { id, userId, ...body } = req.body;
     const idk = req.params.id;
-
+    
     const pet = await Pet.findByPk(idk);
 
     for (i in body) {
