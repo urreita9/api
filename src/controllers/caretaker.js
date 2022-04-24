@@ -228,15 +228,32 @@ exports.postAnswer = async (req, res) => {
 
 exports.editCaretaker = async (req, res) => {
 	const { id } = req.params;
-
+	const { images, ...resto } = req.body;
 	try {
 		const caretaker = await Caretaker.findOne({
 			where: {
 				userId: id,
 			},
+			include: [
+				{
+					model: Image,
+				},
+			],
 		});
+		await caretaker.update({ ...caretaker, ...resto });
 
-		await caretaker.update({ ...req.body });
+		// console.log('CARETAKER IMAGES', caretaker.images);
+
+		const myImages = caretaker.images.map((img) => img.id);
+
+		// console.log('MY IMAGES', myImages);
+
+		myImages.forEach(async (id, i) => {
+			const newImage = images[i];
+			const imagen = await Image.findByPk(id);
+			console.log('IMAGEN X ID', imagen);
+			await imagen.update({ img: newImage });
+		});
 
 		const user = await User.findByPk(id, {
 			include: [
@@ -250,6 +267,7 @@ exports.editCaretaker = async (req, res) => {
 				},
 			],
 		});
+		console.log(user);
 
 		res.json(user);
 	} catch (error) {
