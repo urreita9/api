@@ -53,7 +53,7 @@ const createOperation = async (req, res) => {
         brand_name: "Pettrip.com",
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
-        return_url: "http://localhost:3001/api/operations/capture-order",
+        return_url: "http://localhost:3000/newOperation",
         cancel_url: "http://localhost:3000",
       },
     };
@@ -78,7 +78,7 @@ const createOperation = async (req, res) => {
         },
       }
     );
-    console.log(access_token);
+
     const response = await axios.post(
       "https://api-m.sandbox.paypal.com/v2/checkout/orders",
       order,
@@ -88,7 +88,7 @@ const createOperation = async (req, res) => {
         },
       }
     );
-
+    console.log(response.data);
     res.json(response.data);
   } catch (error) {
     return res.status(500).send("Algo fallo");
@@ -101,6 +101,33 @@ const createOperation = async (req, res) => {
   // 	userId: buyerId,
   // 	caretakerId,
   // });
+};
+
+const captureOrder = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    const response = await axios.post(
+      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
+      {},
+      {
+        auth: {
+          username:
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
+          password:
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
+        },
+      }
+    );
+    console.log("CAPTURE", response.data);
+    res.json(response.data);
+  } catch (error) {
+    res.json("fallo capture order", error);
+  }
+};
+
+const cancelOrder = async (req, res) => {
+  res.redirect("/");
 };
 
 const editOperation = async (req, res) => {
@@ -131,29 +158,6 @@ const editOperation = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-};
-
-const captureOrder = async (req, res) => {
-  const { token } = req.query;
-
-  const response = await axios.post(
-    `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-    {},
-    {
-      auth: {
-        username:
-          "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
-        password:
-          "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
-      },
-    }
-  );
-  console.log(response.data);
-  return res.json(response.data);
-};
-
-const cancelOrder = async (req, res) => {
-  res.redirect("/");
 };
 module.exports = {
   createOperation,
