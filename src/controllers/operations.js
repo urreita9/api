@@ -26,16 +26,25 @@ const { User, Caretaker, Operation } = require("../db");
 // };
 
 const createOperation = async (req, res) => {
-  const { buyerId, sellerId, timeLapse, totalCheckout } = req.body;
+  const {
+    buyerId,
+    sellerId,
+    timeLapse,
+    totalCheckout,
+    id,
+    headers: { uid },
+  } = req.body;
 
-  const userId = req.header("uid");
-  const { id } = req.params;
+  // const userId = req.header("uid");
+  // console.log(req.body, req.header, req.params);
+  // const { id } = req.params;
+  console.log(timeLapse, totalCheckout, id, uid);
 
   const operation = await Operation.create({
     // id: "2030427d-e69d-46cc-a726-fb90608a9778",
     price: totalCheckout,
     timeLapse: timeLapse,
-    userId,
+    userId: uid,
     caretakerId: id,
   });
   console.log("OPERATION HERE", operation.toJSON());

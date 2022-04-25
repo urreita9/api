@@ -9,7 +9,7 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       price: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
       },
       timeLapse: {
