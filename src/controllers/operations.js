@@ -54,7 +54,7 @@ const createOperation = async (req, res) => {
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
         return_url: "http://localhost:3001/api/operations/capture-order",
-        cancel_url: "http://localhost:3001/api/operations/cancel-order",
+        cancel_url: "http://localhost:3000",
       },
     };
 
@@ -152,9 +152,13 @@ const captureOrder = async (req, res) => {
   return res.json(response.data);
 };
 
+const cancelOrder = async (req, res) => {
+  res.redirect("/");
+};
 module.exports = {
   createOperation,
   getOperations,
   editOperation,
   captureOrder,
+  cancelOrder,
 };
