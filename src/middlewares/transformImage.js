@@ -20,7 +20,7 @@ const transformImageOne = async (req, res, next) => {
 
 // middleware para images de caretaker
 const transformImage = async (req, res, next) => {
-    let { caretaker } = req.body;
+    let caretaker = req.body;
     // let { images } = caretaker;
     // console.log('CARETAKER', caretaker);
     // console.log('IMAGEs', caretaker.images);
@@ -29,9 +29,9 @@ const transformImage = async (req, res, next) => {
     // }
 
     // console.log('IMAGES', images);
+
     const uploadedResponse = caretaker.images?.map(async (image) => await cloudinary.uploader.upload(image));
     console.log(uploadedResponse);
-    
 
     const promisesImages = await Promise.all(uploadedResponse);
 
