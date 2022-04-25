@@ -27,7 +27,7 @@ const transformImage = async (req, res, next) => {
     // if(!images.length){
     //   return res.json()
     // }
-
+	
     // console.log('IMAGES', images);
 
     const uploadedResponse = caretaker.images?.map(async (image) => await cloudinary.uploader.upload(image));
