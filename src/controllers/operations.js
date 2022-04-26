@@ -14,37 +14,62 @@ const verifyStatus = (status) => {
   }
 };
 
-const getUserOperations = async (req, res) => {
+const searchOperations = async (operations, user) => {
+  user === 'true'
+    ? (operations = await Promise.all(
+        operations.map(async (operation) => {
+          const caretakerId = operation.caretakerId;
+
+          const caretaker = await User.findByPk(caretakerId);
+
+          return {
+            operation,
+            caretaker,
+          };
+        })
+      ))
+    : (operations = await Promise.all(
+        operations.map(async (operation) => {
+          const userId = operation.userId;
+
+          const user = await User.findByPk(userId);
+
+          return {
+            operation,
+            user,
+          };
+        })
+      ));
+
+  return operations;
+};
+
+const getOperations = async (req, res) => {
   const uid = req.header('uid');
+  const { user } = req.query;
   const userId = req.validUser.id;
+  let operations = [];
 
   userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
 
   try {
-    const operations = await Operation.findAll({
-      where: {
-        userId,
-      },
-    });
+    user === 'true'
+      ? (operations = await Operation.findAll({
+          where: {
+            userId,
+          },
+        }))
+      : (operations = await Operation.findAll({
+          where: {
+            caretakerId: userId,
+          },
+        }));
 
-    operations ? null : res.json({ msg: 'Empty operations' });
+    operations.length ? null : res.json({ msg: 'Empty operations' });
 
-    const operationsWithCaretakers = await Promise.all(
-      operations.map(async (operation) => {
-        const caretakerId = operation.caretakerId;
+    const response = await searchOperations(operations, user);
 
-        const caretaker = await User.findByPk(caretakerId);
-
-        const operationCaretaker = {
-          operation: operation.toJSON(),
-          caretaker: caretaker.toJSON(),
-        };
-
-        return operationCaretaker;
-      })
-    );
-
-    res.json(operationsWithCaretakers);
+    res.json(response);
   } catch (error) {
     res.json({ msg: error });
   }
@@ -59,11 +84,6 @@ const createOperation = async (req, res) => {
     id,
     headers: { uid },
   } = req.body;
-
-  // const userId = req.header("uid");
-  // console.log(req.body, req.header, req.params);
-  // const { id } = req.params;
-  //console.log(timeLapse, totalCheckout, id, uid);
 
   try {
     // aca de la req vamos a sacar los datos de petrip para enviar
@@ -221,7 +241,7 @@ const cancelOrder = async (req, res) => {
 // };
 module.exports = {
   createOperation,
-  getUserOperations,
+  getOperations,
   // editOperation,
   captureOrder,
   cancelOrder,

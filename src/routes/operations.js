@@ -6,11 +6,11 @@ const {
   createOperation,
   captureOrder,
   cancelOrder,
-  getUserOperations,
+  getOperations,
   editOperation,
 } = require('../controllers/operations');
 
-router.get('/', validarJWT, getUserOperations);
+router.get('/', validarJWT, getOperations);
 // router.put("/", editOperation);
 router.post('/create-order', createOperation);
 router.get('/capture-order', captureOrder);
