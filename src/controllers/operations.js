@@ -4,27 +4,51 @@ const { DataTypes } = require('sequelize');
 const { User, Caretaker, Operation } = require('../db');
 const operation = require('../models/operation');
 
-// const getOperations = async (req, res) => {
-//   const { id } = req.params;
-//   const { user } = req.query; // user true?=> userId ////// user false?=> caretakerId
-//   try {
-//     let operations;
-//     if (user === "true") {
-//       operations = await Operation.findAll({ where: { userId: id } });
-//     } else {
-//       operations = await Operation.findAll({
-//         where: { caretakerId: id },
-//       });
-//     }
-//     if (!operations) return res.json({ msg: "No operations" });
+const verifyStatus = (status) => {
+	switch (status) {
+		case 'COMPLETED':
+			return 'APPROVED';
 
-//     res.json(operations);
-//   } catch (error) {
-//     res.status(400).json({
-//       msg: error,
-//     });
-//   }
-// };
+		default:
+			return 'CREATED';
+	}
+};
+
+const getUserOperations = async (req, res) => {
+	const uid = req.header('uid');
+	const userId = req.validUser.id;
+
+	userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
+
+	try {
+		const operations = await Operation.findAll({
+			where: {
+				userId,
+			},
+		});
+
+		operations ? null : res.json({ msg: 'Empty operations' });
+
+		const operationsWithCaretakers = await Promise.all(
+			operations.map(async (operation) => {
+				const caretakerId = operation.caretakerId;
+
+				const caretaker = await User.findByPk(caretakerId);
+
+				const operationCaretaker = {
+					operation: operation.toJSON(),
+					caretaker: caretaker.toJSON(),
+				};
+
+				return operationCaretaker;
+			})
+		);
+
+		res.json(operationsWithCaretakers);
+	} catch (error) {
+		res.json({ msg: error });
+	}
+};
 
 const createOperation = async (req, res) => {
 	const {
@@ -96,7 +120,6 @@ const createOperation = async (req, res) => {
 		);
 
 		const operationId = response.data.id;
-		console.log(operationId);
 
 		await Operation.create({
 			//id: operationId,
@@ -107,10 +130,6 @@ const createOperation = async (req, res) => {
 			caretakerId: id,
 		});
 
-		//console.log('OPERATION HERE', operation.toJSON());
-
-		console.log(response.data.id);
-		//console.log(access_token);
 		res.json(response.data);
 	} catch (error) {
 		res.status(500).send('Algo fallo', error);
@@ -134,6 +153,8 @@ const captureOrder = async (req, res) => {
 			}
 		);
 
+		const status = verifyStatus(response.data.status);
+
 		const operation = await Operation.findOne({
 			where: {
 				operationId: token,
@@ -141,7 +162,7 @@ const captureOrder = async (req, res) => {
 		});
 
 		const operationUpdate = await operation.update(
-			{ status: 'APPROVED' },
+			{ status },
 			{
 				where: {
 					operationId: token,
@@ -200,7 +221,7 @@ const cancelOrder = async (req, res) => {
 // };
 module.exports = {
 	createOperation,
-	// getOperations,
+	getUserOperations,
 	// editOperation,
 	captureOrder,
 	cancelOrder,
