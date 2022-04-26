@@ -1,7 +1,8 @@
-const { default: axios } = require("axios");
-const { DataTypes } = require("sequelize");
+const { default: axios } = require('axios');
+const { DataTypes } = require('sequelize');
 
-const { User, Caretaker, Operation } = require("../db");
+const { User, Caretaker, Operation } = require('../db');
+const operation = require('../models/operation');
 
 // const getOperations = async (req, res) => {
 //   const { id } = req.params;
@@ -38,62 +39,54 @@ const createOperation = async (req, res) => {
   // const userId = req.header("uid");
   // console.log(req.body, req.header, req.params);
   // const { id } = req.params;
-  console.log(timeLapse, totalCheckout, id, uid);
+  //console.log(timeLapse, totalCheckout, id, uid);
 
-  const operation = await Operation.create({
-    // id: "2030427d-e69d-46cc-a726-fb90608a9778",
-    price: totalCheckout,
-    timeLapse: timeLapse,
-    userId: uid,
-    caretakerId: id,
-  });
-  console.log("OPERATION HERE", operation.toJSON());
   try {
     // aca de la req vamos a sacar los datos de petrip para enviar
     const order = {
-      intent: "CAPTURE",
+      intent: 'CAPTURE',
       purchase_units: [
         {
           amount: {
-            currency_code: "USD",
+            currency_code: 'USD',
             value: totalCheckout,
           },
-          description: "Pettrip service payment",
+          description: 'Pettrip service payment',
         },
       ],
       //? QUIEN ME ESTA COBRANDO 🔽
       application_context: {
-        brand_name: "Pettrip.com",
-        landing_page: "LOGIN",
-        user_action: "PAY_NOW",
-        return_url: "http://localhost:3000/newOperation",
-        cancel_url: "http://localhost:3000",
+        brand_name: 'Pettrip.com',
+        landing_page: 'LOGIN',
+        user_action: 'PAY_NOW',
+        return_url: 'http://localhost:3000/newOperation',
+        cancel_url: 'http://localhost:3000',
       },
     };
 
     const params = new URLSearchParams();
-    params.append("grant_type", "client_credentials");
+    params.append('grant_type', 'client_credentials');
 
     const {
       data: { access_token },
     } = await axios.post(
-      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
       params,
       {
         headers: {
-          "Content-type": "application/x-www-form-urlencoded",
+          'Content-type': 'application/x-www-form-urlencoded',
         },
         auth: {
           username:
-            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
+            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
           password:
-            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
+            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
         },
       }
     );
 
     const response = await axios.post(
-      "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
       order,
       {
         headers: {
@@ -101,16 +94,31 @@ const createOperation = async (req, res) => {
         },
       }
     );
-    console.log(response.data);
+
+    const operationId = response.data.id;
+    console.log(operationId);
+
+    await Operation.create({
+      //id: operationId,
+      operationId,
+      price: totalCheckout,
+      timeLapse: timeLapse,
+      userId: uid,
+      caretakerId: id,
+    });
+
+    //console.log('OPERATION HERE', operation.toJSON());
+
+    console.log(response.data.id);
+    //console.log(access_token);
     res.json(response.data);
   } catch (error) {
-    return res.status(500).send("Algo fallo");
+    res.status(500).send('Algo fallo', error);
   }
 };
 
 const captureOrder = async (req, res) => {
-  const { token } = req.query;
-  console.log(token);
+  const { token, PayerID } = req.query;
 
   try {
     const response = await axios.post(
@@ -119,22 +127,46 @@ const captureOrder = async (req, res) => {
       {
         auth: {
           username:
-            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
+            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
           password:
-            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
+            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
         },
       }
     );
-    console.log("CAPTURE", response.data);
-    res.json(response.data);
-    //res.json({ msg: 'Hola' });
+
+    const operation = await Operation.findOne({
+      where: {
+        operationId: token,
+      },
+    });
+
+    const operationUpdate = await operation.update(
+      { status: 'APPROVED' },
+      {
+        where: {
+          operationId: token,
+        },
+      }
+    );
+
+    const { userId, caretakerId } = operation;
+    const user = await User.findByPk(userId);
+    const caretaker = await User.findByPk(caretakerId, {
+      include: [
+        {
+          model: Caretaker,
+        },
+      ],
+    });
+
+    res.json({ user, caretaker });
   } catch (error) {
-    res.json("fallo capture order", error);
+    res.json('fallo capture order', error);
   }
 };
 
 const cancelOrder = async (req, res) => {
-  res.redirect("/");
+  res.redirect('/');
 };
 
 // const editOperation = async (req, res) => {
