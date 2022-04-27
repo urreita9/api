@@ -14,40 +14,6 @@ const verifyStatus = (status) => {
   }
 };
 
-<<<<<<< HEAD
-const getUserOperations = async (req, res) => {
-	const uid = req.header('uid');
-	const userId = req.validUser.id;
-
-	userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
-
-	try {
-		const operations = await Operation.findAll({
-			where: {
-				userId,
-			},
-		});
-
-		operations ? null : res.json({ msg: 'Empty operations' });
-
-		const operationsWithCaretakers = await Promise.all(
-			operations.map(async (operation) => {
-				const caretakerId = operation.caretakerId;
-
-				const caretaker = await User.findByPk(caretakerId);
-
-				return {
-					operation,
-					caretaker,
-				};
-			})
-		);
-
-		res.json(operationsWithCaretakers);
-	} catch (error) {
-		res.status(500).json({ msg: 'something went wrong', error });
-	}
-=======
 const searchOperations = async (operations, user) => {
   user === 'true'
     ? (operations = await Promise.all(
@@ -107,7 +73,6 @@ const getOperations = async (req, res) => {
   } catch (error) {
     res.json({ msg: error });
   }
->>>>>>> ca59e77b7e6bdbc1becb1dedaf655d842fc581f4
 };
 
 const createOperation = async (req, res) => {
