@@ -4,9 +4,13 @@ const jwt = require('jsonwebtoken');
 const { User, Pet } = require('../db');
 
 const validarJWT = async (req = request, res = response, next) => {
-    const token = req.header('x-token');
+    var token = req.header('x-token');
+
     if (!token) {
-        return res.status(401).json({ msg: 'No hay token en la peticion' });
+        token = req.query.token
+        if(!token){
+            return res.status(401).json({ msg: 'No hay token en la peticion' });
+        }
     }
 
     try {

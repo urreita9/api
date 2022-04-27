@@ -34,12 +34,20 @@ module.exports = (sequelize) => {
                 defaultValue: 0,
             },
             role: {
-                type: DataTypes.ENUM('USER', 'ADMIN'),
+                type: DataTypes.ENUM('USER', 'ADMIN', 'SUPER_ADMIN'),
                 defaultValue: 'USER',
             },
             img: {
                 type: DataTypes.STRING(1000),
                 defaultValue: 'https://karlaperezyt.com/wp-content/uploads/kui_system/telegram_profiles/2980022.jpg',
+            },
+            state: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true,
+            },
+            banned: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
             },
         },
         { logging: false, timestamps: false }
