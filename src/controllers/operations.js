@@ -5,15 +5,16 @@ const { User, Caretaker, Operation } = require('../db');
 const operation = require('../models/operation');
 
 const verifyStatus = (status) => {
-	switch (status) {
-		case 'COMPLETED':
-			return 'APPROVED';
+  switch (status) {
+    case 'COMPLETED':
+      return 'APPROVED';
 
-		default:
-			return 'CREATED';
-	}
+    default:
+      return 'CREATED';
+  }
 };
 
+<<<<<<< HEAD
 const getUserOperations = async (req, res) => {
 	const uid = req.header('uid');
 	const userId = req.validUser.id;
@@ -46,146 +47,202 @@ const getUserOperations = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({ msg: 'something went wrong', error });
 	}
+=======
+const searchOperations = async (operations, user) => {
+  user === 'true'
+    ? (operations = await Promise.all(
+        operations.map(async (operation) => {
+          const caretakerId = operation.caretakerId;
+
+          const caretaker = await User.findByPk(caretakerId);
+
+          return {
+            operation,
+            caretaker,
+          };
+        })
+      ))
+    : (operations = await Promise.all(
+        operations.map(async (operation) => {
+          const userId = operation.userId;
+
+          const user = await User.findByPk(userId);
+
+          return {
+            operation,
+            user,
+          };
+        })
+      ));
+
+  return operations;
+};
+
+const getOperations = async (req, res) => {
+  const uid = req.header('uid');
+  const { user } = req.query;
+  const userId = req.validUser.id;
+  let operations = [];
+
+  userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
+
+  try {
+    user === 'true'
+      ? (operations = await Operation.findAll({
+          where: {
+            userId,
+          },
+        }))
+      : (operations = await Operation.findAll({
+          where: {
+            caretakerId: userId,
+          },
+        }));
+
+    operations.length ? null : res.json({ msg: 'Empty operations' });
+
+    const response = await searchOperations(operations, user);
+
+    res.json(response);
+  } catch (error) {
+    res.json({ msg: error });
+  }
+>>>>>>> ca59e77b7e6bdbc1becb1dedaf655d842fc581f4
 };
 
 const createOperation = async (req, res) => {
-	const {
-		buyerId,
-		sellerId,
-		timeLapse,
-		totalCheckout,
-		id,
-		headers: { uid },
-	} = req.body;
+  const {
+    buyerId,
+    sellerId,
+    timeLapse,
+    totalCheckout,
+    id,
+    headers: { uid },
+  } = req.body;
 
-	// const userId = req.header("uid");
-	// console.log(req.body, req.header, req.params);
-	// const { id } = req.params;
-	//console.log(timeLapse, totalCheckout, id, uid);
+  try {
+    // aca de la req vamos a sacar los datos de petrip para enviar
+    const order = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: totalCheckout,
+          },
+          description: 'Pettrip service payment',
+        },
+      ],
+      //? QUIEN ME ESTA COBRANDO 🔽
+      application_context: {
+        brand_name: 'Pettrip.com',
+        landing_page: 'LOGIN',
+        user_action: 'PAY_NOW',
+        return_url: 'http://localhost:3000/newOperation',
+        cancel_url: 'http://localhost:3000',
+      },
+    };
 
-	try {
-		// aca de la req vamos a sacar los datos de petrip para enviar
-		const order = {
-			intent: 'CAPTURE',
-			purchase_units: [
-				{
-					amount: {
-						currency_code: 'USD',
-						value: totalCheckout,
-					},
-					description: 'Pettrip service payment',
-				},
-			],
-			//? QUIEN ME ESTA COBRANDO 🔽
-			application_context: {
-				brand_name: 'Pettrip.com',
-				landing_page: 'LOGIN',
-				user_action: 'PAY_NOW',
-				return_url: 'http://localhost:3000/newOperation',
-				cancel_url: 'http://localhost:3000',
-			},
-		};
+    const params = new URLSearchParams();
+    params.append('grant_type', 'client_credentials');
 
-		const params = new URLSearchParams();
-		params.append('grant_type', 'client_credentials');
+    const {
+      data: { access_token },
+    } = await axios.post(
+      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+      params,
+      {
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded',
+        },
+        auth: {
+          username:
+            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+          password:
+            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+        },
+      }
+    );
 
-		const {
-			data: { access_token },
-		} = await axios.post(
-			'https://api-m.sandbox.paypal.com/v1/oauth2/token',
-			params,
-			{
-				headers: {
-					'Content-type': 'application/x-www-form-urlencoded',
-				},
-				auth: {
-					username:
-						'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-					password:
-						'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-				},
-			}
-		);
+    const response = await axios.post(
+      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
+      order,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
 
-		const response = await axios.post(
-			'https://api-m.sandbox.paypal.com/v2/checkout/orders',
-			order,
-			{
-				headers: {
-					Authorization: `Bearer ${access_token}`,
-				},
-			}
-		);
+    const operationId = response.data.id;
 
-		const operationId = response.data.id;
+    await Operation.create({
+      //id: operationId,
+      operationId,
+      price: totalCheckout,
+      timeLapse: timeLapse,
+      userId: uid,
+      caretakerId: id,
+    });
 
-		await Operation.create({
-			//id: operationId,
-			operationId,
-			price: totalCheckout,
-			timeLapse: timeLapse,
-			userId: uid,
-			caretakerId: id,
-		});
-
-		res.json(response.data);
-	} catch (error) {
-		res.status(500).send('Algo fallo', error);
-	}
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send('Algo fallo', error);
+  }
 };
 
 const captureOrder = async (req, res) => {
-	const { token, PayerID } = req.query;
+  const { token, PayerID } = req.query;
 
-	try {
-		const response = await axios.post(
-			`https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-			{},
-			{
-				auth: {
-					username:
-						'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-					password:
-						'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-				},
-			}
-		);
+  try {
+    const response = await axios.post(
+      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
+      {},
+      {
+        auth: {
+          username:
+            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+          password:
+            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+        },
+      }
+    );
 
-		const status = verifyStatus(response.data.status);
+    const status = verifyStatus(response.data.status);
 
-		const operation = await Operation.findOne({
-			where: {
-				operationId: token,
-			},
-		});
+    const operation = await Operation.findOne({
+      where: {
+        operationId: token,
+      },
+    });
 
-		const operationUpdate = await operation.update(
-			{ status },
-			{
-				where: {
-					operationId: token,
-				},
-			}
-		);
+    const operationUpdate = await operation.update(
+      { status },
+      {
+        where: {
+          operationId: token,
+        },
+      }
+    );
 
-		const { userId, caretakerId } = operation;
-		const user = await User.findByPk(userId);
-		const caretaker = await User.findByPk(caretakerId, {
-			include: [
-				{
-					model: Caretaker,
-				},
-			],
-		});
+    const { userId, caretakerId } = operation;
+    const user = await User.findByPk(userId);
+    const caretaker = await User.findByPk(caretakerId, {
+      include: [
+        {
+          model: Caretaker,
+        },
+      ],
+    });
 
-		res.json({ user, caretaker, operation });
-	} catch (error) {
-		res.json('fallo capture order', error);
-	}
+    res.json({ user, caretaker, operation });
+  } catch (error) {
+    res.json('fallo capture order', error);
+  }
 };
 
 const cancelOrder = async (req, res) => {
-	res.redirect('/');
+  res.redirect('/');
 };
 
 // const editOperation = async (req, res) => {
@@ -218,9 +275,9 @@ const cancelOrder = async (req, res) => {
 //   }
 // };
 module.exports = {
-	createOperation,
-	getUserOperations,
-	// editOperation,
-	captureOrder,
-	cancelOrder,
+  createOperation,
+  getOperations,
+  // editOperation,
+  captureOrder,
+  cancelOrder,
 };
