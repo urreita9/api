@@ -1,7 +1,15 @@
 const { Router } = require('express');
 const { check, body } = require('express-validator');
 const { existeUsuarioPorId } = require('../helpers/db-validators');
-const { validarCampos, validarJWT, validarPermisos, validarPermisosProfile } = require('../middlewares');
+const {
+    validarCampos,
+    validarJWT,
+    validarPermisos,
+    validarPermisosProfile,
+    validarSuperAdmin,
+    validarSuperAdminyAdmin,
+} = require('../middlewares');
+const { transformImage, transformImageOne } = require('../middlewares/transformImage');
 
 const {
     getUsers,
@@ -11,8 +19,14 @@ const {
     editUser,
     deleteUser,
     checkPassword,
+    createSuperAdmin,
+    beAdmin,
+    beUser,
+    banUser,
+    unBanUser,
+    createAdmin,
+    getUsersAdmin,
 } = require('../controllers/User');
-const { transformImage, transformImageOne } = require('../middlewares/transformImage');
 
 const router = Router();
 
@@ -103,5 +117,85 @@ router.post(
     ],
     checkPassword
 );
+
+router.post(
+    '/create/superadmin',
+    [
+        check('name', 'Debe tener un nombre').not().isEmpty(),
+        check('lastname', 'Debe tener un apellido').not().isEmpty(),
+        check('email', 'El email es obligatorio').not().isEmpty(),
+        check('email', 'El email no es valido').isEmail(),
+        check('password', 'La constraseña es obligatoria').not().isEmpty(),
+        check('password', 'El password tiene que tener mas de 6 letras').isLength({
+            min: 6,
+        }),
+        validarCampos,
+    ],
+    createSuperAdmin
+);
+
+router.post(
+    '/create/admin',
+    [
+        validarJWT,
+        validarSuperAdmin,
+        check('name', 'Debe tener un nombre').not().isEmpty(),
+        check('lastname', 'Debe tener un apellido').not().isEmpty(),
+        check('email', 'El email es obligatorio').not().isEmpty(),
+        check('email', 'El email no es valido').isEmail(),
+        check('password', 'La constraseña es obligatoria').not().isEmpty(),
+        check('password', 'El password tiene que tener mas de 6 letras').isLength({
+            min: 6,
+        }),
+        validarCampos,
+    ],
+    createAdmin
+);
+router.put(
+    '/edit/beadmin',
+    [
+        validarJWT,
+        validarSuperAdmin,
+        check('userId', 'ID no valido').isUUID(),
+        check('userId').custom(existeUsuarioPorId),
+        validarCampos,
+    ],
+    beAdmin
+);
+router.put(
+    '/edit/beuser',
+    [
+        validarJWT,
+        validarSuperAdmin,
+        check('userId', 'ID no valido').isUUID(),
+        check('userId').custom(existeUsuarioPorId),
+        validarCampos,
+    ],
+    beUser
+);
+router.put(
+    '/edit/banuser',
+    [
+        validarJWT,
+        validarSuperAdminyAdmin,
+        check('userId', 'ID no valido').isUUID(),
+        check('userId').custom(existeUsuarioPorId),
+        validarCampos,
+    ],
+    banUser
+);
+router.put(
+    '/edit/unbanuser',
+    [
+        validarJWT,
+        validarSuperAdminyAdmin,
+        check('userId', 'ID no valido').isUUID(),
+        check('userId').custom(existeUsuarioPorId),
+        validarCampos,
+    ],
+    unBanUser
+);
+
+router.get('/admin/users', [validarJWT, validarSuperAdminyAdmin], getUsersAdmin);
 
 module.exports = router;

@@ -48,8 +48,41 @@ const validarPermisosDueño = async (req = request, res = response, next) => {
     next();
 };
 
+const validarAdmin = async (role1, role2, { req = request, res = response, next }) => {
+    const validUser = req.validUser;
+
+    if (validUser.role === 'ADMIN') {
+        next();
+    } else {
+        res.status(401).json({ state: false, msg: 'No posee los permisos necesarios' });
+    }
+};
+
+const validarSuperAdmin = async (req = request, res = response, next) => {
+    const validUser = req.validUser;
+
+    if (validUser.role === 'SUPER_ADMIN') {
+        next();
+    } else {
+        res.status(401).json({ state: false, msg: 'No posee los permisos necesarios' });
+    }
+};
+
+const validarSuperAdminyAdmin = async (req = request, res = response, next) => {
+    const validUser = req.validUser;
+
+    if (validUser.role === 'SUPER_ADMIN' || validUser.role === 'ADMIN') {
+        next();
+    } else {
+        res.status(401).json({ state: false, msg: 'No posee los permisos necesarios' });
+    }
+};
+
 module.exports = {
     validarPermisos,
     validarPermisosDueño,
     validarPermisosProfile,
+    validarAdmin,
+    validarSuperAdmin,
+    validarSuperAdminyAdmin,
 };
