@@ -35,18 +35,16 @@ const getUserOperations = async (req, res) => {
 
 				const caretaker = await User.findByPk(caretakerId);
 
-				const operationCaretaker = {
-					operation: operation.toJSON(),
-					caretaker: caretaker.toJSON(),
+				return {
+					operation,
+					caretaker,
 				};
-
-				return operationCaretaker;
 			})
 		);
 
 		res.json(operationsWithCaretakers);
 	} catch (error) {
-		res.json({ msg: error });
+		res.status(500).json({ msg: 'something went wrong', error });
 	}
 };
 
