@@ -26,6 +26,7 @@ const {
     unBanUser,
     createAdmin,
     getUsersAdmin,
+    setPassword,
 } = require('../controllers/User');
 
 const router = Router();
@@ -89,6 +90,18 @@ router.put(
     ],
     editUser
 );
+
+router.put("/setpassword/:id",[
+    validarJWT,
+    check('id', 'ID no valido').isUUID(),
+    check('id').custom(existeUsuarioPorId),
+    validarCampos,
+    validarPermisos,
+    body('password', 'El password tiene que tener mas de 6 letras').if(body('password').exists()).isLength({
+        min: 6,
+    }),
+    validarCampos,
+], setPassword)
 
 //BORRAR UN USER
 router.delete(

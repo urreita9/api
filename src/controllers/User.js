@@ -131,6 +131,19 @@ const editUser = async (req = request, res = response) => {
     res.json(user);
 };
 
+const setPassword = async (req = request, res = response) => {
+    const { id } = req.params;
+    let { password } = req.body;
+
+    const user = await User.findByPk(id);
+
+    password = bcryptjs.hashSync(password, 10);
+
+    await user.update({ password, passwordsetted: true });
+
+    res.json(user);
+};
+
 const deleteUser = async (req = request, res = response) => {
     const { id } = req.params;
 
@@ -306,4 +319,5 @@ module.exports = {
     banUser,
     unBanUser,
     getUsersAdmin,
+    setPassword,
 };

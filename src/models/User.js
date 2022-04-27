@@ -49,6 +49,14 @@ module.exports = (sequelize) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
             },
+            google: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
+            passwordsetted: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true,
+            },
         },
         { logging: false, timestamps: false }
     );
