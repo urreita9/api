@@ -196,7 +196,7 @@ const captureOrder = async (req, res) => {
       }
     );
 
-    const { userId, caretakerId } = operation;
+    const { userId, caretakerId, petId } = operation;
     const user = await User.findByPk(userId);
     const caretaker = await User.findByPk(caretakerId, {
       include: [
@@ -205,8 +205,9 @@ const captureOrder = async (req, res) => {
         },
       ],
     });
+    const pet = await Pet.findByPk(petId);
 
-    res.json({ user, caretaker, operation });
+    res.json({ user, caretaker, operation, pet });
   } catch (error) {
     res.json('fallo capture order', error);
   }
