@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const { DataTypes } = require('sequelize');
 
-const { User, Caretaker, Operation } = require('../db');
+const { User, Caretaker, Operation, Pet } = require('../db');
 const operation = require('../models/operation');
 
 const verifyStatus = (status) => {
@@ -18,25 +18,29 @@ const searchOperations = async (operations, user) => {
   user === 'true'
     ? (operations = await Promise.all(
         operations.map(async (operation) => {
-          const caretakerId = operation.caretakerId;
+          const { caretakerId, petId } = operation;
 
           const caretaker = await User.findByPk(caretakerId);
+          const pet = await Pet.findByPk(petId);
 
           return {
             operation,
             caretaker,
+            pet,
           };
         })
       ))
     : (operations = await Promise.all(
         operations.map(async (operation) => {
-          const userId = operation.userId;
+          const { userId, petId } = operation;
 
           const user = await User.findByPk(userId);
+          const pet = await Pet.findByPk(petId);
 
           return {
             operation,
             user,
+            pet,
           };
         })
       ));
@@ -82,6 +86,7 @@ const createOperation = async (req, res) => {
     timeLapse,
     totalCheckout,
     id,
+    petId,
     headers: { uid },
   } = req.body;
 
@@ -148,6 +153,7 @@ const createOperation = async (req, res) => {
       timeLapse: timeLapse,
       userId: uid,
       caretakerId: id,
+      petId,
     });
 
     res.json(response.data);
