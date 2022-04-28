@@ -5,216 +5,217 @@ const { User, Caretaker, Operation, Pet } = require('../db');
 const operation = require('../models/operation');
 
 const verifyStatus = (status) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'APPROVED';
+	switch (status) {
+		case 'COMPLETED':
+			return 'APPROVED';
 
-    default:
-      return 'CREATED';
-  }
+		default:
+			return 'CREATED';
+	}
 };
 
 const searchOperations = async (operations, user) => {
-  user === 'true'
-    ? (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { caretakerId, petId } = operation;
+	user === 'true'
+		? (operations = await Promise.all(
+				operations.map(async (operation) => {
+					const { caretakerId, petId } = operation;
 
-          const caretaker = await User.findByPk(caretakerId);
-          const pet = await Pet.findByPk(petId);
+					const caretaker = await User.findByPk(caretakerId);
+					const pet = await Pet.findByPk(petId);
 
-          return {
-            operation,
-            caretaker,
-            pet,
-          };
-        })
-      ))
-    : (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { userId, petId } = operation;
+					return {
+						operation,
+						caretaker,
+						pet,
+					};
+				})
+		  ))
+		: (operations = await Promise.all(
+				operations.map(async (operation) => {
+					const { userId, petId } = operation;
 
-          const user = await User.findByPk(userId);
-          const pet = await Pet.findByPk(petId);
+					const user = await User.findByPk(userId);
+					const pet = await Pet.findByPk(petId);
 
-          return {
-            operation,
-            user,
-            pet,
-          };
-        })
-      ));
+					return {
+						operation,
+						user,
+						pet,
+					};
+				})
+		  ));
 
-  return operations;
+	return operations;
 };
 
 const getOperations = async (req, res) => {
-  const uid = req.header('uid');
-  const { user } = req.query;
-  const userId = req.validUser.id;
-  let operations = [];
+	const uid = req.header('uid');
+	const { user } = req.query;
+	const userId = req.validUser.id;
+	let operations = [];
 
-  userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
+	userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
 
-  try {
-    user === 'true'
-      ? (operations = await Operation.findAll({
-          where: {
-            userId,
-          },
-        }))
-      : (operations = await Operation.findAll({
-          where: {
-            caretakerId: userId,
-          },
-        }));
+	try {
+		user === 'true'
+			? (operations = await Operation.findAll({
+					where: {
+						userId,
+					},
+			  }))
+			: (operations = await Operation.findAll({
+					where: {
+						caretakerId: userId,
+					},
+			  }));
 
-    operations.length ? null : res.json({ msg: 'Empty operations' });
+		operations.length ? null : res.json({ msg: 'Empty operations' });
 
-    const response = await searchOperations(operations, user);
+		const response = await searchOperations(operations, user);
 
-    res.json(response);
-  } catch (error) {
-    res.json({ msg: error });
-  }
+		res.json(response);
+	} catch (error) {
+		res.json({ msg: error });
+	}
 };
 
 const createOperation = async (req, res) => {
-  const {
-    buyerId,
-    sellerId,
-    timeLapse,
-    totalCheckout,
-    id,
-    petId,
-    headers: { uid },
-  } = req.body;
+	const {
+		buyerId,
+		sellerId,
+		timeLapse,
+		totalCheckout,
+		id,
+		petId,
+		headers: { uid },
+	} = req.body;
 
-  try {
-    // aca de la req vamos a sacar los datos de petrip para enviar
-    const order = {
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value: totalCheckout,
-          },
-          description: 'Pettrip service payment',
-        },
-      ],
-      //? QUIEN ME ESTA COBRANDO 🔽
-      application_context: {
-        brand_name: 'Pettrip.com',
-        landing_page: 'LOGIN',
-        user_action: 'PAY_NOW',
-        return_url: 'http://localhost:3000/newOperation',
-        cancel_url: 'http://localhost:3000',
-      },
-    };
+	console.log('petId', petId);
+	try {
+		// aca de la req vamos a sacar los datos de petrip para enviar
+		const order = {
+			intent: 'CAPTURE',
+			purchase_units: [
+				{
+					amount: {
+						currency_code: 'USD',
+						value: totalCheckout,
+					},
+					description: 'Pettrip service payment',
+				},
+			],
+			//? QUIEN ME ESTA COBRANDO 🔽
+			application_context: {
+				brand_name: 'Pettrip.com',
+				landing_page: 'LOGIN',
+				user_action: 'PAY_NOW',
+				return_url: 'http://localhost:3000/newOperation',
+				cancel_url: 'http://localhost:3000',
+			},
+		};
 
-    const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
+		const params = new URLSearchParams();
+		params.append('grant_type', 'client_credentials');
 
-    const {
-      data: { access_token },
-    } = await axios.post(
-      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
-      params,
-      {
-        headers: {
-          'Content-type': 'application/x-www-form-urlencoded',
-        },
-        auth: {
-          username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-          password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-        },
-      }
-    );
+		const {
+			data: { access_token },
+		} = await axios.post(
+			'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+			params,
+			{
+				headers: {
+					'Content-type': 'application/x-www-form-urlencoded',
+				},
+				auth: {
+					username:
+						'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+					password:
+						'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+				},
+			}
+		);
 
-    const response = await axios.post(
-      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
-      order,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
+		const response = await axios.post(
+			'https://api-m.sandbox.paypal.com/v2/checkout/orders',
+			order,
+			{
+				headers: {
+					Authorization: `Bearer ${access_token}`,
+				},
+			}
+		);
 
-    const operationId = response.data.id;
+		const operationId = response.data.id;
 
-    await Operation.create({
-      //id: operationId,
-      operationId,
-      price: totalCheckout,
-      timeLapse: timeLapse,
-      userId: uid,
-      caretakerId: id,
-      petId,
-    });
+		await Operation.create({
+			//id: operationId,
+			operationId,
+			price: totalCheckout,
+			timeLapse: timeLapse,
+			userId: uid,
+			caretakerId: id,
+			petId,
+		});
 
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).send('Algo fallo', error);
-  }
+		res.json(response.data);
+	} catch (error) {
+		res.status(500).send('Algo fallo', error);
+	}
 };
 
 const captureOrder = async (req, res) => {
-  const { token, PayerID } = req.query;
+	const { token, PayerID } = req.query;
 
-  try {
-    const response = await axios.post(
-      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-      {},
-      {
-        auth: {
-          username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-          password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-        },
-      }
-    );
+	try {
+		const response = await axios.post(
+			`https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
+			{},
+			{
+				auth: {
+					username:
+						'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+					password:
+						'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+				},
+			}
+		);
 
-    const status = verifyStatus(response.data.status);
+		const status = verifyStatus(response.data.status);
 
-    const operation = await Operation.findOne({
-      where: {
-        operationId: token,
-      },
-    });
+		const operation = await Operation.findOne({
+			where: {
+				operationId: token,
+			},
+		});
 
-    const operationUpdate = await operation.update(
-      { status },
-      {
-        where: {
-          operationId: token,
-        },
-      }
-    );
+		const operationUpdate = await operation.update(
+			{ status },
+			{
+				where: {
+					operationId: token,
+				},
+			}
+		);
 
-    const { userId, caretakerId, petId } = operation;
-    const user = await User.findByPk(userId);
-    const caretaker = await User.findByPk(caretakerId, {
-      include: [
-        {
-          model: Caretaker,
-        },
-      ],
-    });
-    const pet = await Pet.findByPk(petId);
+		const { userId, caretakerId, petId } = operation;
+		const user = await User.findByPk(userId);
+		const caretaker = await User.findByPk(caretakerId, {
+			include: [
+				{
+					model: Caretaker,
+				},
+			],
+		});
+		const pet = await Pet.findByPk(petId);
 
-    res.json({ user, caretaker, operation, pet });
-  } catch (error) {
-    res.json('fallo capture order', error);
-  }
+		res.json({ user, caretaker, operation, pet });
+	} catch (error) {
+		res.json('fallo capture order', error);
+	}
 };
 
 const cancelOrder = async (req, res) => {
-  res.redirect('/');
+	res.redirect('/');
 };
 
 // const editOperation = async (req, res) => {
@@ -247,9 +248,9 @@ const cancelOrder = async (req, res) => {
 //   }
 // };
 module.exports = {
-  createOperation,
-  getOperations,
-  // editOperation,
-  captureOrder,
-  cancelOrder,
+	createOperation,
+	getOperations,
+	// editOperation,
+	captureOrder,
+	cancelOrder,
 };
