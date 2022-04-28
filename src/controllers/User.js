@@ -1,3 +1,5 @@
+require("dotenv").config();
+const nodemailer = require("nodemailer");
 const { response } = require("express");
 const { request } = require("express");
 const { User, Pet, Caretaker, Image } = require("../db");
@@ -86,7 +88,7 @@ const createUser = async (req = request, res = response) => {
     service: "gmail",
     auth: {
       user: process.env.gmail,
-      pass: process.env.pass,
+      pass: process.env.gmail_pass,
     },
     tls: {
       rejectUnauthorized: false,
