@@ -218,35 +218,6 @@ const cancelOrder = async (req, res) => {
 	res.redirect('/');
 };
 
-// const editOperation = async (req, res) => {
-//   const { idOperation, idPayment } = req.body;
-
-//   try {
-//     const { data } = await axios.get(
-//       `https://api.mercadopago.com/merchant_orders/${idPayment}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
-//         },
-//       }
-//     );
-
-//     // console.log('data', data);
-//     const operation = await Operation.findByPk(idOperation);
-
-//     if (!operation) return res.status.json({ msg: "Operation does not exist" });
-
-//     const updatedOperation = await operation.update({
-//       ...operation,
-//       status: data.payments[0].status,
-//     });
-
-//     // console.log('UPDATED OP', updatedOperation);
-//     res.json(updatedOperation);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 module.exports = {
 	createOperation,
 	getOperations,
