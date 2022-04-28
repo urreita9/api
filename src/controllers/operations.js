@@ -1,3 +1,5 @@
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 const { default: axios } = require('axios');
 const { DataTypes } = require('sequelize');
 
@@ -163,6 +165,61 @@ const createOperation = async (req, res) => {
   }
 };
 
+// const captureOrder = async (req, res) => {
+//   const { token, PayerID } = req.query;
+
+//   try {
+//     const response = await axios.post(
+//       `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
+//       {},
+//       {
+//         auth: {
+//           username:
+//             'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+//           password:
+//             'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+//         },
+//       }
+//     );
+
+//     const status = verifyStatus(response.data.status);
+
+//     const operation = await Operation.findOne({
+//       where: {
+//         operationId: token,
+//       },
+//     });
+
+//     const operationUpdate = await operation.update(
+//       { status },
+//       {
+//         where: {
+//           operationId: token,
+//         },
+//       }
+//     );
+
+//     const { userId, caretakerId, petId } = operation;
+//     const user = await User.findByPk(userId);
+//     const caretaker = await User.findByPk(caretakerId, {
+//       include: [
+//         {
+//           model: Caretaker,
+//         },
+//       ],
+//     });
+//     const pet = await Pet.findByPk(petId);
+
+//     res.json({ user, caretaker, operation, pet });
+//   } catch (error) {
+//     res.json('fallo capture order', error);
+//   }
+// };
+
+const cancelOrder = async (req, res) => {
+  res.redirect('/');
+};
+
 const captureOrder = async (req, res) => {
   const { token, PayerID } = req.query;
 
@@ -208,14 +265,50 @@ const captureOrder = async (req, res) => {
     });
     const pet = await Pet.findByPk(petId);
 
+    let mailTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.gmail,
+        pass: process.env.gmail_pass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    let details = {
+      from: process.env.gmail,
+      to: user.email,
+      subject: 'Pettrip reservation',
+      text: `You have succesfully booked a service with ${caretaker.name} ${caretaker.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details `,
+    };
+    let details2 = {
+      from: process.env.gmail,
+      to: caretaker.email,
+      subject: 'Pettrip reservation',
+      text: `You have a reservation from ${user.name} ${user.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details`,
+    };
+
+    mailTransporter.sendMail(details, (error) => {
+      if (error) {
+        console.log(error.message);
+      } else {
+        console.log(`user email sent`);
+      }
+    });
+
+    mailTransporter.sendMail(details2, (error) => {
+      if (error) {
+        console.log(error.message);
+      } else {
+        console.log(`taker email sent`);
+      }
+    });
+
     res.json({ user, caretaker, operation, pet });
   } catch (error) {
     res.json('fallo capture order', error);
   }
-};
-
-const cancelOrder = async (req, res) => {
-  res.redirect('/');
 };
 
 // const editOperation = async (req, res) => {
