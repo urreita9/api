@@ -31,7 +31,7 @@ module.exports = (sequelize) => {
       },
       petId: {
         type: DataTypes.STRING,
-        //allowNull: false,
+        allowNull: false,
       },
     },
     { logging: false }
