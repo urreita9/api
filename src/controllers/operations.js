@@ -53,8 +53,9 @@ const getOperations = async (req, res) => {
   const { user } = req.query;
   const userId = req.validUser.id;
   let operations = [];
+  console.log(req.header('uid'));
 
-  userId !== uid ? res.status(401).json({ msg: 'Unauthorized user' }) : null;
+  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
 
   try {
     user === 'true'
@@ -69,7 +70,7 @@ const getOperations = async (req, res) => {
           },
         }));
 
-    operations.length ? null : res.json({ msg: 'Empty operations' });
+    if (!operations.length) return res.json({ msg: 'Empty operations' });
 
     const response = await searchOperations(operations, user);
 
