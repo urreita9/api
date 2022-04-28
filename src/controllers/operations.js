@@ -1,256 +1,148 @@
-const { default: axios } = require('axios');
-const { DataTypes } = require('sequelize');
+require("dotenv").config();
+const { default: axios } = require("axios");
+const { response } = require("express");
+const { request } = require("express");
+const mercadopago = require("mercadopago");
+const { User, Caretaker, Operation } = require("../db");
 
-const { User, Caretaker, Operation, Pet } = require('../db');
-const operation = require('../models/operation');
-
-const verifyStatus = (status) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'APPROVED';
-
-    default:
-      return 'CREATED';
-  }
-};
-
-const searchOperations = async (operations, user) => {
-  user === 'true'
-    ? (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { caretakerId, petId } = operation;
-
-          const caretaker = await User.findByPk(caretakerId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            caretaker,
-            pet,
-          };
-        })
-      ))
-    : (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { userId, petId } = operation;
-
-          const user = await User.findByPk(userId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            user,
-            pet,
-          };
-        })
-      ));
-
-  return operations;
-};
+// mercadopago.configure({
+//   access_token:
+//     "APP_USR-4823601086553499-042319-7bbfe7a012a25e20cb28a99ee4b25cde-188306852",
+// });
 
 const getOperations = async (req, res) => {
-  const uid = req.header('uid');
-  const { user } = req.query;
-  const userId = req.validUser.id;
-  let operations = [];
-  console.log(req.header('uid'));
-
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
-
+  const { id } = req.params;
+  const { user } = req.query; // user true?=> userId ////// user false?=> caretakerId
   try {
-    user === 'true'
-      ? (operations = await Operation.findAll({
-          where: {
-            userId,
-          },
-        }))
-      : (operations = await Operation.findAll({
-          where: {
-            caretakerId: userId,
-          },
-        }));
+    let operations;
+    if (user === "true") {
+      operations = await Operation.findAll({ where: { userId: id } });
+    } else {
+      operations = await Operation.findAll({
+        where: { caretakerId: id },
+      });
+    }
+    if (!operations) return res.json({ msg: "No operations" });
 
-    if (!operations.length) return res.json({ msg: 'Empty operations' });
-
-    const response = await searchOperations(operations, user);
-
-    res.json(response);
+    res.json(operations);
   } catch (error) {
-    res.json({ msg: error });
+    res.status(400).json({
+      msg: error,
+    });
   }
 };
 
 const createOperation = async (req, res) => {
-  const {
-    buyerId,
-    sellerId,
-    timeLapse,
-    totalCheckout,
+  const { buyerId, sellerId, datesRange, price, timeLapse } = req.body;
+
+  const caretaker = await Caretaker.findOne({
+    where: {
+      userId: sellerId,
+    },
+  });
+
+  const { id: caretakerId } = caretaker.dataValues;
+
+  let preference = {
+    items: [
+      {
+        title: "Petrip Reservation",
+        unit_price: price,
+        quantity: timeLapse,
+      },
+    ],
+    back_urls: {
+      success: "http://localhost:3000/operation",
+      failure: "http://localhost:3000",
+      pending: "http://localhost:3000",
+    },
+    payer: {
+      name: "Juan",
+      surname: "Lopez",
+      email: "test_user_73703636@testuser.com",
+    },
+    payment_methods: {
+      excluded_payment_types: [
+        {
+          id: "ticket",
+        },
+      ],
+      installments: 1,
+    },
+  };
+  const response = await mercadopago.preferences.create(preference);
+
+  const id = response.response.id;
+
+  const operation = await Operation.create({
     id,
-    petId,
-    headers: { uid },
-  } = req.body;
+    price,
+    timeLapse,
+    userId: buyerId,
+    caretakerId,
+  });
+
+  res.json({ operation, response: response.response });
+};
+
+const editOperation = async (req, res) => {
+  const { idOperation, idPayment } = req.body;
 
   try {
-    // aca de la req vamos a sacar los datos de petrip para enviar
-    const order = {
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value: totalCheckout,
-          },
-          description: 'Pettrip service payment',
-        },
-      ],
-      //? QUIEN ME ESTA COBRANDO 🔽
-      application_context: {
-        brand_name: 'Pettrip.com',
-        landing_page: 'LOGIN',
-        user_action: 'PAY_NOW',
-        return_url: 'http://localhost:3000/newOperation',
-        cancel_url: 'http://localhost:3000',
-      },
-    };
-
-    const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
-
-    const {
-      data: { access_token },
-    } = await axios.post(
-      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
-      params,
+    const { data } = await axios.get(
+      `https://api.mercadopago.com/merchant_orders/${idPayment}`,
       {
         headers: {
-          'Content-type': 'application/x-www-form-urlencoded',
-        },
-        auth: {
-          username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-          password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+          Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
         },
       }
     );
 
-    const response = await axios.post(
-      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
-      order,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
+    // console.log('data', data);
+    const operation = await Operation.findByPk(idOperation);
 
-    const operationId = response.data.id;
+    if (!operation) return res.status.json({ msg: "Operation does not exist" });
 
-    await Operation.create({
-      //id: operationId,
-      operationId,
-      price: totalCheckout,
-      timeLapse: timeLapse,
-      userId: uid,
-      caretakerId: id,
-      petId,
+    const updatedOperation = await operation.update({
+      ...operation,
+      status: data.payments[0].status,
     });
 
-    res.json(response.data);
+    // console.log('UPDATED OP', updatedOperation);
+    res.json(updatedOperation);
   } catch (error) {
-    res.status(500).send('Algo fallo', error);
+    console.log(error);
   }
+
+  // const operation = await Operation.findByPk(id);
+  // //  'https://api.mercadopago.com/merchant_orders/{id}' \
+  // //     -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+
+  // const updatedOperation = await operation.update({
+  // 	status,
+  // });
+
+  // res.json(updatedOperation);
 };
 
-const captureOrder = async (req, res) => {
-  const { token, PayerID } = req.query;
-
-  try {
-    const response = await axios.post(
-      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-      {},
-      {
-        auth: {
-          username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-          password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-        },
-      }
-    );
-
-    const status = verifyStatus(response.data.status);
-
-    const operation = await Operation.findOne({
-      where: {
-        operationId: token,
-      },
-    });
-
-    const operationUpdate = await operation.update(
-      { status },
-      {
-        where: {
-          operationId: token,
-        },
-      }
-    );
-
-    const { userId, caretakerId, petId } = operation;
-    const user = await User.findByPk(userId);
-    const caretaker = await User.findByPk(caretakerId, {
-      include: [
-        {
-          model: Caretaker,
-        },
-      ],
-    });
-    const pet = await Pet.findByPk(petId);
-
-    res.json({ user, caretaker, operation, pet });
-  } catch (error) {
-    res.json('fallo capture order', error);
-  }
-};
-
-const cancelOrder = async (req, res) => {
-  res.redirect('/');
-};
-
-// const editOperation = async (req, res) => {
-//   const { idOperation, idPayment } = req.body;
-
-//   try {
-//     const { data } = await axios.get(
-//       `https://api.mercadopago.com/merchant_orders/${idPayment}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
-//         },
-//       }
-//     );
-
-//     // console.log('data', data);
-//     const operation = await Operation.findByPk(idOperation);
-
-//     if (!operation) return res.status.json({ msg: "Operation does not exist" });
-
-//     const updatedOperation = await operation.update({
-//       ...operation,
-//       status: data.payments[0].status,
-//     });
-
-//     // console.log('UPDATED OP', updatedOperation);
-//     res.json(updatedOperation);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 module.exports = {
   createOperation,
   getOperations,
-  // editOperation,
-  captureOrder,
-  cancelOrder,
+  editOperation,
+};
+
+const mockUser1 = {
+  id: 1109688142,
+  nickname: "TEST4OSXIB7J",
+  password: "qatest981",
+  site_status: "active",
+  email: "test_user_49681815@testuser.com",
+};
+
+const mockUser2 = {
+  id: 1109692263,
+  nickname: "TESTVNPZFVR2",
+  password: "qatest9890",
+  site_status: "active",
+  email: "test_user_73703636@testuser.com",
 };
