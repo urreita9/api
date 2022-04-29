@@ -1,23 +1,23 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
-const { default: axios } = require('axios');
-const { DataTypes } = require('sequelize');
+require("dotenv").config();
+const nodemailer = require("nodemailer");
+const { default: axios } = require("axios");
+const { DataTypes } = require("sequelize");
 
-const { User, Caretaker, Operation, Pet } = require('../db');
-const operation = require('../models/operation');
+const { User, Caretaker, Operation, Pet } = require("../db");
+const operation = require("../models/operation");
 
 const verifyStatus = (status) => {
   switch (status) {
-    case 'COMPLETED':
-      return 'APPROVED';
+    case "COMPLETED":
+      return "APPROVED";
 
     default:
-      return 'CREATED';
+      return "CREATED";
   }
 };
 
 const searchOperations = async (operations, user) => {
-  user === 'true'
+  user === "true"
     ? (operations = await Promise.all(
         operations.map(async (operation) => {
           const { caretakerId, petId } = operation;
@@ -51,15 +51,15 @@ const searchOperations = async (operations, user) => {
 };
 
 const getOperations = async (req, res) => {
-  const uid = req.header('uid');
+  const uid = req.header("uid");
   const { user } = req.query;
   const userId = req.validUser.id;
   let operations = [];
 
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  if (userId !== uid) return res.status(401).json({ msg: "Unauthorized user" });
 
   try {
-    user === 'true'
+    user === "true"
       ? (operations = await Operation.findAll({
           where: {
             userId,
@@ -71,7 +71,7 @@ const getOperations = async (req, res) => {
           },
         }));
 
-    if (!operations.length) return res.json({ msg: 'Empty operations' });
+    if (!operations.length) return res.json({ msg: "Empty operations" });
 
     const response = await searchOperations(operations, user);
 
@@ -92,53 +92,53 @@ const createOperation = async (req, res) => {
     headers: { uid },
   } = req.body;
 
-  console.log('petId', petId);
+  console.log("petId", petId);
   try {
     // aca de la req vamos a sacar los datos de petrip para enviar
     const order = {
-      intent: 'CAPTURE',
+      intent: "CAPTURE",
       purchase_units: [
         {
           amount: {
-            currency_code: 'USD',
+            currency_code: "USD",
             value: totalCheckout,
           },
-          description: 'Pettrip service payment',
+          description: "Pettrip service payment",
         },
       ],
       //? QUIEN ME ESTA COBRANDO 🔽
       application_context: {
-        brand_name: 'Pettrip.com',
-        landing_page: 'LOGIN',
-        user_action: 'PAY_NOW',
-        return_url: 'http://localhost:3000/newOperation',
-        cancel_url: 'http://localhost:3000',
+        brand_name: "Pettrip.com",
+        landing_page: "LOGIN",
+        user_action: "PAY_NOW",
+        return_url: "http://localhost:3000/newOperation",
+        cancel_url: "http://localhost:3000",
       },
     };
 
     const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
+    params.append("grant_type", "client_credentials");
 
     const {
       data: { access_token },
     } = await axios.post(
-      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
       params,
       {
         headers: {
-          'Content-type': 'application/x-www-form-urlencoded',
+          "Content-type": "application/x-www-form-urlencoded",
         },
         auth: {
           username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
           password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
         },
       }
     );
 
     const response = await axios.post(
-      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
+      "https://api-m.sandbox.paypal.com/v2/checkout/orders",
       order,
       {
         headers: {
@@ -161,7 +161,7 @@ const createOperation = async (req, res) => {
 
     res.json(response.data);
   } catch (error) {
-    res.status(500).send('Algo fallo', error);
+    res.status(500).send("Algo fallo", error);
   }
 };
 
@@ -217,7 +217,7 @@ const createOperation = async (req, res) => {
 // };
 
 const cancelOrder = async (req, res) => {
-  res.redirect('/');
+  res.redirect("/");
 };
 
 const captureOrder = async (req, res) => {
@@ -230,9 +230,9 @@ const captureOrder = async (req, res) => {
       {
         auth: {
           username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
           password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
         },
       }
     );
@@ -266,7 +266,7 @@ const captureOrder = async (req, res) => {
     const pet = await Pet.findByPk(petId);
 
     let mailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.gmail,
         pass: process.env.gmail_pass,
@@ -279,13 +279,13 @@ const captureOrder = async (req, res) => {
     let details = {
       from: process.env.gmail,
       to: user.email,
-      subject: 'Pettrip reservation',
+      subject: "Pettrip reservation",
       text: `You have succesfully booked a service with ${caretaker.name} ${caretaker.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details `,
     };
     let details2 = {
       from: process.env.gmail,
       to: caretaker.email,
-      subject: 'Pettrip reservation',
+      subject: "Pettrip reservation",
       text: `You have a reservation from ${user.name} ${user.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details`,
     };
 
@@ -307,7 +307,7 @@ const captureOrder = async (req, res) => {
 
     res.json({ user, caretaker, operation, pet });
   } catch (error) {
-    res.json('fallo capture order', error);
+    res.json("fallo capture order", error);
   }
 };
 
