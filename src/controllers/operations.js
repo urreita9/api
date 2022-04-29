@@ -89,6 +89,8 @@ const createOperation = async (req, res) => {
     totalCheckout,
     id,
     petId,
+    startDate,
+    endDate,
     headers: { uid },
   } = req.body;
 
@@ -157,6 +159,8 @@ const createOperation = async (req, res) => {
       userId: uid,
       caretakerId: id,
       petId,
+      startDate,
+      endDate,
     });
 
     res.json(response.data);
@@ -254,7 +258,7 @@ const captureOrder = async (req, res) => {
       }
     );
 
-    const { userId, caretakerId, petId } = operation;
+    const { userId, caretakerId, petId, startDate, endDate } = operation;
     const user = await User.findByPk(userId);
     const caretaker = await User.findByPk(caretakerId, {
       include: [
