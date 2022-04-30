@@ -1,54 +1,8 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
-const { default: axios } = require("axios");
-const { DataTypes } = require("sequelize");
-
-const { User, Caretaker, Operation, Pet } = require("../db");
-const operation = require("../models/operation");
-
-const verifyStatus = (status) => {
-  switch (status) {
-    case "COMPLETED":
-      return "APPROVED";
-
-    default:
-      return "CREATED";
-  }
-};
-
-const searchOperations = async (operations, user) => {
-  user === "true"
-    ? (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { caretakerId, petId } = operation;
-
-          const caretaker = await User.findByPk(caretakerId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            caretaker,
-            pet,
-          };
-        })
-      ))
-    : (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { userId, petId } = operation;
-
-          const user = await User.findByPk(userId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            user,
-            pet,
-          };
-        })
-      ));
-
-  return operations;
-};
+require('dotenv').config();
+const nodemailer = require('nodemailer');
+const { default: axios } = require('axios');
+const { User, Caretaker, Operation, Pet } = require('../db');
+const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations} = require('./functions/operationFunctions')
 
 const getOperations = async (req, res) => {
   const uid = req.header("uid");
@@ -78,6 +32,38 @@ const getOperations = async (req, res) => {
     res.json(response);
   } catch (error) {
     res.json({ msg: error });
+  }
+};
+
+const getAllOperations = async (req, res) => {
+  const uid = req.header('uid');
+  const userId = req.validUser.id;
+
+  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+
+  try {
+    const operations = await Operation.findAll();
+    
+    if (!operations.length) return res.json({ msg: 'Empty operations' });
+
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+
+    res.json(response);
+  } catch (error) {
+    res.json({ msg: 'All operations error' });
   }
 };
 
@@ -152,7 +138,6 @@ const createOperation = async (req, res) => {
     const operationId = response.data.id;
 
     await Operation.create({
-      //id: operationId,
       operationId,
       price: totalCheckout,
       timeLapse: timeLapse,
@@ -168,57 +153,6 @@ const createOperation = async (req, res) => {
     res.status(500).send("Algo fallo", error);
   }
 };
-
-// const captureOrder = async (req, res) => {
-//   const { token, PayerID } = req.query;
-
-//   try {
-//     const response = await axios.post(
-//       `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-//       {},
-//       {
-//         auth: {
-//           username:
-//             'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-//           password:
-//             'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-//         },
-//       }
-//     );
-
-//     const status = verifyStatus(response.data.status);
-
-//     const operation = await Operation.findOne({
-//       where: {
-//         operationId: token,
-//       },
-//     });
-
-//     const operationUpdate = await operation.update(
-//       { status },
-//       {
-//         where: {
-//           operationId: token,
-//         },
-//       }
-//     );
-
-//     const { userId, caretakerId, petId } = operation;
-//     const user = await User.findByPk(userId);
-//     const caretaker = await User.findByPk(caretakerId, {
-//       include: [
-//         {
-//           model: Caretaker,
-//         },
-//       ],
-//     });
-//     const pet = await Pet.findByPk(petId);
-
-//     res.json({ user, caretaker, operation, pet });
-//   } catch (error) {
-//     res.json('fallo capture order', error);
-//   }
-// };
 
 const cancelOrder = async (req, res) => {
   res.redirect("/");
@@ -315,39 +249,30 @@ const captureOrder = async (req, res) => {
   }
 };
 
-// const editOperation = async (req, res) => {
-//   const { idOperation, idPayment } = req.body;
+const editOperation = async (req, res) => {
+  const uid = req.header('uid');
+  const {id: userId, role} = req.validUser;
+  const { operationId } = req.body;
+  let response;
 
-//   try {
-//     const { data } = await axios.get(
-//       `https://api.mercadopago.com/merchant_orders/${idPayment}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
-//         },
-//       }
-//     );
+  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  
+  role === 'SUPER_ADMIN' ? response = await editDispatchOperation(operationId): response = await editStatusOperation(operationId);
 
-//     // console.log('data', data);
-//     const operation = await Operation.findByPk(idOperation);
+  if(response){
+    const operations = await Operation.findAll()
 
-//     if (!operation) return res.status.json({ msg: "Operation does not exist" });
+    return res.json(operations)
+  }
 
-//     const updatedOperation = await operation.update({
-//       ...operation,
-//       status: data.payments[0].status,
-//     });
+  res.json({ msg: 'Edit operation error' })
+};
 
-//     // console.log('UPDATED OP', updatedOperation);
-//     res.json(updatedOperation);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 module.exports = {
   createOperation,
   getOperations,
-  // editOperation,
+  getAllOperations,
+  editOperation,
   captureOrder,
   cancelOrder,
 };

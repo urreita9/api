@@ -1,9 +1,9 @@
 require("dotenv").config();
-const nodemailer = require("nodemailer");
 const { response } = require("express");
 const { request } = require("express");
 const { User, Pet, Caretaker, Image } = require("../db");
 const bcryptjs = require("bcryptjs");
+const nodemailer = require('nodemailer');
 
 const getUsers = async (req = request, res = response) => {
   const users = await User.findAll({
@@ -84,13 +84,6 @@ const getUserJWT = async (req = request, res = response) => {
 const createUser = async (req = request, res = response) => {
   let { name, lastname, email, password } = req.body;
 
-  let details = {
-    from: process.env.gmail,
-    to: email,
-    subject: "Welcome to Pettrip!",
-    text: `Welcome to pettrip, ${name} ${lastname}! you have successfully created your account with the email ${email}.`,
-  };
-
   let mailTransporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -101,6 +94,13 @@ const createUser = async (req = request, res = response) => {
       rejectUnauthorized: false,
     },
   });
+
+  let details = {
+    from: `PetTrip 🐕🐈 <${process.env.gmail}>`,
+    to: email,
+    subject: "Welcome to Pettrip! 🐕🐈",
+    text: `Welcome to pettrip, ${name} ${lastname}! you have successfully created your account with the email ${email}.`,
+  };
 
   const user = await User.findOne({
     where: {
