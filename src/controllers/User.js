@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const { response } = require("express");
 const { request } = require("express");
 const { User, Pet, Caretaker, Image } = require("../db");
@@ -202,7 +202,7 @@ const createSuperAdmin = async (req = request, res = response) => {
     },
   });
 
-  if (supperPass === process.env.SUPERADMIN_PASS) {
+  if (supperPass && supperPass === process.env.SUPERADMIN_PASS) {
     if (user) {
       return res
         .status(400)
