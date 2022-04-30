@@ -52,9 +52,9 @@ const editStatusOperation = async (operationId) => {
 
     await operation.update({ status: 'COMPLETED' });
 
-    return operation;
+    return true;
   } catch (error) {
-    return { msg: 'Edit operation error' };
+    return false; 
   }
 }
 
@@ -66,9 +66,9 @@ const editDispatchOperation = async (operationId) => {
 
     await operation.update({ status: 'COMPLETED', dispatch: true });
 
-    return operation;
+    return true;
   } catch (error) {
-    return { msg: 'Edit operation error' }; 
+    return false; 
   }
 }
 
