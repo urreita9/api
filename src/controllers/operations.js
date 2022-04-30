@@ -261,8 +261,22 @@ const editOperation = async (req, res) => {
 
   if(response){
     const operations = await Operation.findAll()
-
-    return res.json(operations)
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+      
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+      
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+    console.log('OP BACK',response)
+    return res.json(response)
   }
 
   res.json({ msg: 'Edit operation error' })
