@@ -1,7 +1,9 @@
+require('dotenv').config();
 const { response } = require("express");
 const { request } = require("express");
 const { User, Pet, Caretaker, Image } = require("../db");
 const bcryptjs = require("bcryptjs");
+const nodemailer = require('nodemailer');
 
 const getUsers = async (req = request, res = response) => {
   const users = await User.findAll({
@@ -86,7 +88,7 @@ const createUser = async (req = request, res = response) => {
     service: "gmail",
     auth: {
       user: process.env.gmail,
-      pass: process.env.pass,
+      pass: process.env.gmail_pass,
     },
     tls: {
       rejectUnauthorized: false,
@@ -94,9 +96,9 @@ const createUser = async (req = request, res = response) => {
   });
 
   let details = {
-    from: process.env.gmail,
+    from: `PetTrip 🐕🐈 <${process.env.gmail}>`,
     to: email,
-    subject: "Welcome to Pettrip!",
+    subject: "Welcome to Pettrip! 🐕🐈",
     text: `Welcome to pettrip, ${name} ${lastname}! you have successfully created your account with the email ${email}.`,
   };
 
