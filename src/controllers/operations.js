@@ -43,10 +43,25 @@ const getAllOperations = async (req, res) => {
 
   try {
     const operations = await Operation.findAll();
-
+    
     if (!operations.length) return res.json({ msg: 'Empty operations' });
 
-    res.json(operations);
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+
+    res.json(response);
   } catch (error) {
     res.json({ msg: 'All operations error' });
   }
@@ -234,13 +249,19 @@ const editOperation = async (req, res) => {
   const uid = req.header('uid');
   const {id: userId, role} = req.validUser;
   const { operationId } = req.body;
-  let response = {}
+  let response;
 
   if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
   
   role === 'SUPER_ADMIN' ? response = await editDispatchOperation(operationId): response = await editStatusOperation(operationId);
 
-  res.json(response)
+  if(response){
+    const operations = await Operation.findAll()
+
+    return res.json(operations)
+  }
+
+  res.json({ msg: 'Edit operation error' })
 };
 
 module.exports = {
