@@ -1,65 +1,19 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const { default: axios } = require('axios');
-const { DataTypes } = require('sequelize');
-
 const { User, Caretaker, Operation, Pet } = require('../db');
-const operation = require('../models/operation');
-
-const verifyStatus = (status) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'APPROVED';
-
-    default:
-      return 'CREATED';
-  }
-};
-
-const searchOperations = async (operations, user) => {
-  user === 'true'
-    ? (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { caretakerId, petId } = operation;
-
-          const caretaker = await User.findByPk(caretakerId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            caretaker,
-            pet,
-          };
-        })
-      ))
-    : (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { userId, petId } = operation;
-
-          const user = await User.findByPk(userId);
-          const pet = await Pet.findByPk(petId);
-
-          return {
-            operation,
-            user,
-            pet,
-          };
-        })
-      ));
-
-  return operations;
-};
+const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations} = require('./functions/operationFunctions')
 
 const getOperations = async (req, res) => {
-  const uid = req.header('uid');
+  const uid = req.header("uid");
   const { user } = req.query;
   const userId = req.validUser.id;
   let operations = [];
 
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  if (userId !== uid) return res.status(401).json({ msg: "Unauthorized user" });
 
   try {
-    user === 'true'
+    user === "true"
       ? (operations = await Operation.findAll({
           where: {
             userId,
@@ -71,13 +25,45 @@ const getOperations = async (req, res) => {
           },
         }));
 
-    if (!operations.length) return res.json({ msg: 'Empty operations' });
+    if (!operations.length) return res.json({ msg: "Empty operations" });
 
     const response = await searchOperations(operations, user);
 
     res.json(response);
   } catch (error) {
     res.json({ msg: error });
+  }
+};
+
+const getAllOperations = async (req, res) => {
+  const uid = req.header('uid');
+  const userId = req.validUser.id;
+
+  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+
+  try {
+    const operations = await Operation.findAll();
+    
+    if (!operations.length) return res.json({ msg: 'Empty operations' });
+
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+
+    res.json(response);
+  } catch (error) {
+    res.json({ msg: 'All operations error' });
   }
 };
 
@@ -89,56 +75,58 @@ const createOperation = async (req, res) => {
     totalCheckout,
     id,
     petId,
+    startDate,
+    endDate,
     headers: { uid },
   } = req.body;
 
-  console.log('petId', petId);
+  console.log("petId", petId);
   try {
     // aca de la req vamos a sacar los datos de petrip para enviar
     const order = {
-      intent: 'CAPTURE',
+      intent: "CAPTURE",
       purchase_units: [
         {
           amount: {
-            currency_code: 'USD',
+            currency_code: "USD",
             value: totalCheckout,
           },
-          description: 'Pettrip service payment',
+          description: "Pettrip service payment",
         },
       ],
       //? QUIEN ME ESTA COBRANDO 🔽
       application_context: {
-        brand_name: 'Pettrip.com',
-        landing_page: 'LOGIN',
-        user_action: 'PAY_NOW',
-        return_url: 'http://localhost:3000/newOperation',
-        cancel_url: 'http://localhost:3000',
+        brand_name: "Pettrip.com",
+        landing_page: "LOGIN",
+        user_action: "PAY_NOW",
+        return_url: "http://localhost:3000/newOperation",
+        cancel_url: "http://localhost:3000",
       },
     };
 
     const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
+    params.append("grant_type", "client_credentials");
 
     const {
       data: { access_token },
     } = await axios.post(
-      'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
       params,
       {
         headers: {
-          'Content-type': 'application/x-www-form-urlencoded',
+          "Content-type": "application/x-www-form-urlencoded",
         },
         auth: {
           username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
           password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
         },
       }
     );
 
     const response = await axios.post(
-      'https://api-m.sandbox.paypal.com/v2/checkout/orders',
+      "https://api-m.sandbox.paypal.com/v2/checkout/orders",
       order,
       {
         headers: {
@@ -150,74 +138,24 @@ const createOperation = async (req, res) => {
     const operationId = response.data.id;
 
     await Operation.create({
-      //id: operationId,
       operationId,
       price: totalCheckout,
       timeLapse: timeLapse,
       userId: uid,
       caretakerId: id,
       petId,
+      startDate,
+      endDate,
     });
 
     res.json(response.data);
   } catch (error) {
-    res.status(500).send('Algo fallo', error);
+    res.status(500).send("Algo fallo", error);
   }
 };
 
-// const captureOrder = async (req, res) => {
-//   const { token, PayerID } = req.query;
-
-//   try {
-//     const response = await axios.post(
-//       `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-//       {},
-//       {
-//         auth: {
-//           username:
-//             'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
-//           password:
-//             'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
-//         },
-//       }
-//     );
-
-//     const status = verifyStatus(response.data.status);
-
-//     const operation = await Operation.findOne({
-//       where: {
-//         operationId: token,
-//       },
-//     });
-
-//     const operationUpdate = await operation.update(
-//       { status },
-//       {
-//         where: {
-//           operationId: token,
-//         },
-//       }
-//     );
-
-//     const { userId, caretakerId, petId } = operation;
-//     const user = await User.findByPk(userId);
-//     const caretaker = await User.findByPk(caretakerId, {
-//       include: [
-//         {
-//           model: Caretaker,
-//         },
-//       ],
-//     });
-//     const pet = await Pet.findByPk(petId);
-
-//     res.json({ user, caretaker, operation, pet });
-//   } catch (error) {
-//     res.json('fallo capture order', error);
-//   }
-// };
-
 const cancelOrder = async (req, res) => {
-  res.redirect('/');
+  res.redirect("/");
 };
 
 const captureOrder = async (req, res) => {
@@ -230,9 +168,9 @@ const captureOrder = async (req, res) => {
       {
         auth: {
           username:
-            'ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK',
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
           password:
-            'ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0',
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
         },
       }
     );
@@ -254,7 +192,7 @@ const captureOrder = async (req, res) => {
       }
     );
 
-    const { userId, caretakerId, petId } = operation;
+    const { userId, caretakerId, petId, startDate, endDate } = operation;
     const user = await User.findByPk(userId);
     const caretaker = await User.findByPk(caretakerId, {
       include: [
@@ -266,7 +204,7 @@ const captureOrder = async (req, res) => {
     const pet = await Pet.findByPk(petId);
 
     let mailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.gmail,
         pass: process.env.gmail_pass,
@@ -279,13 +217,13 @@ const captureOrder = async (req, res) => {
     let details = {
       from: process.env.gmail,
       to: user.email,
-      subject: 'Pettrip reservation',
+      subject: "Pettrip reservation",
       text: `You have succesfully booked a service with ${caretaker.name} ${caretaker.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details `,
     };
     let details2 = {
       from: process.env.gmail,
       to: caretaker.email,
-      subject: 'Pettrip reservation',
+      subject: "Pettrip reservation",
       text: `You have a reservation from ${user.name} ${user.lastname} on  ${operation.startDate} to ${operation.endDate} check the website for more details`,
     };
 
@@ -307,43 +245,48 @@ const captureOrder = async (req, res) => {
 
     res.json({ user, caretaker, operation, pet });
   } catch (error) {
-    res.json('fallo capture order', error);
+    res.json("fallo capture order", error);
   }
 };
 
-// const editOperation = async (req, res) => {
-//   const { idOperation, idPayment } = req.body;
+const editOperation = async (req, res) => {
+  const uid = req.header('uid');
+  const {id: userId, role} = req.validUser;
+  const { operationId } = req.body;
+  let response;
 
-//   try {
-//     const { data } = await axios.get(
-//       `https://api.mercadopago.com/merchant_orders/${idPayment}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.TOKEN_PROD_TEST}`,
-//         },
-//       }
-//     );
+  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  
+  role === 'SUPER_ADMIN' ? response = await editDispatchOperation(operationId): response = await editStatusOperation(operationId);
 
-//     // console.log('data', data);
-//     const operation = await Operation.findByPk(idOperation);
+  if(response){
+    const operations = await Operation.findAll()
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+      
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+      
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+    console.log('OP BACK',response)
+    return res.json(response)
+  }
 
-//     if (!operation) return res.status.json({ msg: "Operation does not exist" });
+  res.json({ msg: 'Edit operation error' })
+};
 
-//     const updatedOperation = await operation.update({
-//       ...operation,
-//       status: data.payments[0].status,
-//     });
-
-//     // console.log('UPDATED OP', updatedOperation);
-//     res.json(updatedOperation);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 module.exports = {
   createOperation,
   getOperations,
-  // editOperation,
+  getAllOperations,
+  editOperation,
   captureOrder,
   cancelOrder,
 };

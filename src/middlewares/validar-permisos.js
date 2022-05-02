@@ -48,7 +48,12 @@ const validarPermisosDueño = async (req = request, res = response, next) => {
     next();
 };
 
-const validarAdmin = async (role1, role2, { req = request, res = response, next }) => {
+const validarAdmin = async (
+    //{ 
+    req = request, res = response, next ,
+    //},
+    role1, role2, 
+  ) => {
     const validUser = req.validUser;
 
     if (validUser.role === 'ADMIN') {

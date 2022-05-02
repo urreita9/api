@@ -5,7 +5,6 @@ const generarJWT = (uid = '', expires = '') => {
         const payload = { uid };
 
         if (!!expires) {
-            
             jwt.sign(
                 payload,
                 process.env.SECRETORPRIVATEKEY,
@@ -34,6 +33,17 @@ const generarJWT = (uid = '', expires = '') => {
     });
 };
 
+const comprobarJWT = (token = '') => {
+    try {
+        const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+
+        return [true, uid];
+    } catch (error) {
+        return [false, null];
+    }
+};
+
 module.exports = {
     generarJWT,
+    comprobarJWT,
 };
