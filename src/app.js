@@ -5,10 +5,16 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const routes = require('./routes/index.js');
+const http = require('http');
+const socketio = require('socket.io');
+const { Server } = require('socket.io');
+const Sockets = require('./routes/sockets.js');
 
 require('./db.js');
 //cambio para commitear a heroku
 const server = express();
+const ioserver = http.createServer(server);
+const io = new Server(ioserver);
 
 server.name = 'API';
 server.use(cors());
@@ -24,7 +30,13 @@ server.use((req, res, next) => {
     next();
 });
 
+
+//RUTAS REST
 server.use('/api', routes);
+
+
+//RUTAS SOCKET
+const socket = new Sockets(io);
 
 // Error catching endware.
 server.use((err, req, res, next) => {
@@ -35,4 +47,4 @@ server.use((err, req, res, next) => {
     res.status(status).send(message);
 });
 
-module.exports = server;
+module.exports = ioserver;

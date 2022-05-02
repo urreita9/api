@@ -31,7 +31,8 @@
         "nodemon": "^2.0.15",
         "pg": "^8.7.3",
         "pg-hstore": "^2.3.4",
-        "sequelize": "^6.3.5"
+        "sequelize": "^6.3.5",
+        "socket.io": "^4.5.0"
     },
     "devDependencies": {
         "chai": "^4.2.0",

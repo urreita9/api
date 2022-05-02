@@ -57,6 +57,10 @@ module.exports = (sequelize) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
             },
+            online: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
         },
         { logging: false, timestamps: false }
     );
