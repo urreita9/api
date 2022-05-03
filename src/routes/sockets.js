@@ -1,45 +1,58 @@
-const { usuarioConectado, usuarioDesconectado, crearMensaje, getAllChatsIO } = require('../controllers/sockets');
+const {
+	usuarioConectado,
+	usuarioDesconectado,
+	crearMensaje,
+	getAllChatsIO,
+} = require('../controllers/sockets');
 const { comprobarJWT } = require('../helpers/generar-jwt');
 
 class Sockets {
-    constructor(io) {
-        this.io = io;
+	constructor(io) {
+		this.io = io;
 
-        this.socketEvents();
-    }
-    socketEvents() {
-        this.io.on('connection', async (socket) => {
-            const token = socket.handshake.query['x-token'];
-            //Comprobar autentificacion
-            const [ok, uid] = await comprobarJWT(token);
+		this.socketEvents();
+	}
+	socketEvents() {
+		this.io.on('connection', async (socket) => {
+			const token = socket.handshake.query['x-token'];
+			//Comprobar autentificacion
+			const [ok, uid] = await comprobarJWT(token);
 
-            if (!ok) {
-                console.log('Socket no identificado');
-                return socket.disconnect();
-            }
+			if (!ok) {
+				console.log('Socket no identificado');
+				return socket.disconnect();
+			}
 
-            await usuarioConectado(uid);
+			await usuarioConectado(uid);
 
-            console.log('Usuario conectado');
+			console.log('Usuario conectado');
 
-            socket.emit('chats', await getAllChatsIO(uid));
+			socket.join(uid);
+			const chats = await getAllChatsIO(uid);
 
-            //Conectar a sala
-            socket.join(uid);
+			socket.emit('chats', chats);
 
-            socket.on('mensaje-personal', async (payload) => {
-                const mensaje = await crearMensaje(payload);
-                this.io.to(payload.para).emit('mensaje-personal', mensaje);
-                this.io.to(payload.de).emit('mensaje-personal', mensaje);
-            });
+			const usersParaActualizar = chats.map((el) => el.user2.id);
 
-            //Desconecion del socket
-            socket.on('disconnect', async () => {
-                console.log('disconnect');
-                await usuarioDesconectado(uid);
-            });
-        });
-    }
+			usersParaActualizar.forEach(async (id) => {
+				this.io.to(id).emit('actualizate-perro', await getAllChatsIO(id));
+			});
+
+			socket.on('personal-message', async (payload) => {
+				const mensaje = await crearMensaje(payload);
+				this.io.to(payload.para).emit('personal-message', mensaje);
+				this.io.to(payload.de).emit('personal-message', mensaje);
+			});
+			//Desconecion del socket
+			socket.on('disconnect', async () => {
+				console.log('disconnect');
+				await usuarioDesconectado(uid);
+				usersParaActualizar.forEach(async (el) => {
+					this.io.to(el).emit('actualizate-perro', await getAllChatsIO(el));
+				});
+			});
+		});
+	}
 }
 
 module.exports = Sockets;
