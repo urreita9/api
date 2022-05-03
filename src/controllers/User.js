@@ -100,7 +100,7 @@ const getUserJWT = async (req = request, res = response) => {
                 include: [
                     {
                         model: User,
-                        attributes: ['id'],
+                        attributes: ['id', 'name', 'lastname', 'img'],
                         through: {
                             attributes: [],
                         },
@@ -110,7 +110,27 @@ const getUserJWT = async (req = request, res = response) => {
         ],
     });
 
-    res.json(user);
+    const usuario = JSON.parse(JSON.stringify(user));
+
+    const chats = usuario.chats;
+
+    const chatsFinal = chats.map((el) => {
+        var user2 = {};
+        el.users.forEach((user) => {
+            if (user.id !== usuario.id) {
+                user2 = user;
+            }
+        });
+
+        return {
+            chatId: el.id,
+            user2,
+        };
+    });
+
+    usuario.chats = chatsFinal;
+
+    res.json(usuario);
 };
 
 const createUser = async (req = request, res = response) => {
