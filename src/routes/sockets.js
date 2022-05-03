@@ -1,4 +1,10 @@
-const { usuarioConectado, usuarioDesconectado, crearMensaje, getAllChatsIO } = require('../controllers/sockets');
+const {
+    usuarioConectado,
+    usuarioDesconectado,
+    crearMensaje,
+    getAllChatsIO,
+    
+} = require('../controllers/sockets');
 const { comprobarJWT } = require('../helpers/generar-jwt');
 
 class Sockets {
@@ -22,21 +28,33 @@ class Sockets {
 
             console.log('Usuario conectado');
 
-            socket.emit('chats', await getAllChatsIO(uid));
-
-            //Conectar a sala
             socket.join(uid);
 
-            socket.on('mensaje-personal', async (payload) => {
+            const chats = await getAllChatsIO(uid)
+
+            socket.emit('chats', chats);
+
+            const usersParaActualizar = chats.map((el) => el.user2.id)
+
+            usersParaActualizar.forEach(async (id) => {
+                this.io.to(id).emit('actualizate-perro', await getAllChatsIO(id));
+            });
+            //Conectar a sala
+            
+
+            socket.on('personal-message', async (payload) => {
                 const mensaje = await crearMensaje(payload);
-                this.io.to(payload.para).emit('mensaje-personal', mensaje);
-                this.io.to(payload.de).emit('mensaje-personal', mensaje);
+                this.io.to(payload.para).emit('personal-message', mensaje);
+                this.io.to(payload.de).emit('personal-message', mensaje);
             });
 
             //Desconecion del socket
             socket.on('disconnect', async () => {
                 console.log('disconnect');
                 await usuarioDesconectado(uid);
+                usersParaActualizar.forEach(async (el) => {
+                    this.io.to(el).emit('actualizate-perro', await getAllChatsIO(el));
+                });
             });
         });
     }
