@@ -1,4 +1,4 @@
-const { usuarioConectado, usuarioDesconectado, crearMensaje } = require('../controllers/sockets');
+const { usuarioConectado, usuarioDesconectado, crearMensaje, getAllChatsIO } = require('../controllers/sockets');
 const { comprobarJWT } = require('../helpers/generar-jwt');
 
 class Sockets {
@@ -21,6 +21,8 @@ class Sockets {
             await usuarioConectado(uid);
 
             console.log('Usuario conectado');
+
+            socket.emit('chats', await getAllChatsIO(uid));
 
             //Conectar a sala
             socket.join(uid);
