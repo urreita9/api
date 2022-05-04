@@ -99,8 +99,8 @@ const createOperation = async (req, res) => {
         brand_name: "Pettrip.com",
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
-        return_url: "http://localhost:3000/newOperation",
-        cancel_url: "http://localhost:3000",
+        return_url: "https://pettrip.vercel.app/newOperation",
+        cancel_url: "https://pettrip.vercel.app/",
       },
     };
 
