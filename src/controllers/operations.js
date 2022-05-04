@@ -107,7 +107,7 @@ const createOperation = async (req, res) => {
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
         return_url: "http://localhost:3000/newOperation",
-        cancel_url: "http://localhost:3001/cancel-order",
+        cancel_url: "http://localhost:3000/cancelOperation",
       },
     };
 
@@ -163,6 +163,7 @@ const createOperation = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   const { token } = req.query;
+  console.log(token);
 
   try {
     const {
