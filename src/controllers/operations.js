@@ -162,64 +162,34 @@ const createOperation = async (req, res) => {
 };
 
 const cancelOrder = async (req, res) => {
-  const { token } = req.query;
-  console.log(token);
+   const { token } = req.query;
 
-  try {
-    const {
-      data: { access_token },
-    } = await axios.post(
-      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
-      {},
+  try{
+    const operation = await Operation.findOne(
       {
-        auth: {
-          username:
-            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
-          password:
-            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
-        },
+        where: {
+          operationId: token
+        }
       }
-    );
+    )
 
-    // const status = verifyStatus(response.data.status);
+    await operation.update({status: 'CANCELED'})
 
-    // const operation = await Operation.findOne({
-    //   where: {
-    //     operationId: token,
-    //   },
-    // });
+    console.log(operation.toJSON())
 
-    // const operationUpdate = await operation.update(
-    //   { status },
-    //   {
-    //     where: {
-    //       operationId: token,
-    //     },
-    //   }
-    // );
-
-    // const { userId, caretakerId, petId, startDate, endDate } = operation;
-    // const user = await User.findByPk(userId);
-    // const caretaker = await User.findByPk(caretakerId, {
-    //   include: [
-    //     {
-    //       model: Caretaker,
-    //     },
-    //   ],
-    // });
-    // const pet = await Pet.findByPk(petId);
-
-    const response = await axios.delete(
-      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
+    const { userId, caretakerId, petId, startDate, endDate } = operation;
+    const user = await User.findByPk(userId);
+    const caretaker = await User.findByPk(caretakerId, {
+      include: [
+        {
+          model: Caretaker,
         },
-      }
-    );
-
-    console.log(response.data);
-    res.json(response.data);
+      ],
+    });
+    const pet = await Pet.findByPk(petId);
+  
+    //res.json(operation)
+    res.json({ user, caretaker, operation, pet });
   } catch (error) {
     res.status(500).send("Algo fallo en el cancel ", error);
   }
