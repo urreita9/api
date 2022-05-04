@@ -12,6 +12,7 @@ const authRouter = require('./auth.js');
 const operationsRouter = require('./operations.js');
 const chatRouter = require('./chats.js');
 const messageRouter = require('./messages.js');
+const chatNotificationsRouter = require('./chatnotifications');
 
 const router = Router();
 
@@ -23,6 +24,7 @@ router.use('/auth', authRouter);
 router.use('/operations', operationsRouter);
 router.use('/chats', chatRouter);
 router.use('/messages', messageRouter);
+router.use('/notifications', chatNotificationsRouter);
 
 // Configurar los routers
 // Ejemplo: router.use('/auth', authRouter);
