@@ -1,11 +1,18 @@
 const { response } = require('express');
 const { request } = require('express');
-const { User, Chat, Message } = require('../db');
+const { User, Chat, Message, Chatnotification } = require('../db');
 const getAllChats = async (req = request, res = response) => {
     const chats = await Chat.findAll({
         include: [
             {
                 model: User,
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: [],
+                },
+            },
+            {
+                model: Chatnotification,
             },
         ],
     });

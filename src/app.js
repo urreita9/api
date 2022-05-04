@@ -36,7 +36,10 @@ server.use('/api', routes);
 
 
 //RUTAS SOCKET
+
 const socket = new Sockets(io);
+
+
 
 // Error catching endware.
 server.use((err, req, res, next) => {
