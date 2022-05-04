@@ -1,8 +1,13 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
-const { default: axios } = require('axios');
-const { User, Caretaker, Operation, Pet } = require('../db');
-const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations} = require('./functions/operationFunctions')
+require("dotenv").config();
+const nodemailer = require("nodemailer");
+const { default: axios } = require("axios");
+const { User, Caretaker, Operation, Pet } = require("../db");
+const {
+  editStatusOperation,
+  editDispatchOperation,
+  verifyStatus,
+  searchOperations,
+} = require("./functions/operationFunctions");
 
 const getOperations = async (req, res) => {
   const uid = req.header("uid");
@@ -36,34 +41,36 @@ const getOperations = async (req, res) => {
 };
 
 const getAllOperations = async (req, res) => {
-  const uid = req.header('uid');
+  const uid = req.header("uid");
   const userId = req.validUser.id;
 
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  if (userId !== uid) return res.status(401).json({ msg: "Unauthorized user" });
 
   try {
     const operations = await Operation.findAll();
-    
-    if (!operations.length) return res.json({ msg: 'Empty operations' });
 
-    const response = await Promise.all(operations.map(async operation => {
-      const {caretakerId, petId, userId} = operation
+    if (!operations.length) return res.json({ msg: "Empty operations" });
 
-      const user = await User.findByPk(userId)
-      const caretaker = await User.findByPk(caretakerId)
-      const pet = await Pet.findByPk(petId)
+    const response = await Promise.all(
+      operations.map(async (operation) => {
+        const { caretakerId, petId, userId } = operation;
 
-      return {
-        operation,
-        user,
-        caretaker,
-        pet
-      }
-    }))
+        const user = await User.findByPk(userId);
+        const caretaker = await User.findByPk(caretakerId);
+        const pet = await Pet.findByPk(petId);
+
+        return {
+          operation,
+          user,
+          caretaker,
+          pet,
+        };
+      })
+    );
 
     res.json(response);
   } catch (error) {
-    res.json({ msg: 'All operations error' });
+    res.json({ msg: "All operations error" });
   }
 };
 
@@ -100,7 +107,7 @@ const createOperation = async (req, res) => {
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
         return_url: "http://localhost:3000/newOperation",
-        cancel_url: "http://localhost:3000",
+        cancel_url: "http://localhost:3001/cancel-order",
       },
     };
 
@@ -155,7 +162,66 @@ const createOperation = async (req, res) => {
 };
 
 const cancelOrder = async (req, res) => {
-  res.redirect("/");
+  const { token } = req.query;
+
+  try {
+    const {
+      data: { access_token },
+    } = await axios.post(
+      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${token}/capture`,
+      {},
+      {
+        auth: {
+          username:
+            "ASQ9t935qCpKlbb8P3b_4ciyOTzQvW0GPJuOTRFxJT2-mwdW3EL_sR-YnjqfllUzssA_k95dCITyQdZK",
+          password:
+            "ELHmoUIfLFmI6dN59EQIn_IOEID9_Hc9XB7y1IrLLm_TM18Sux4MMe-OlvEEOevVIIyshdR9L5C-Gib0",
+        },
+      }
+    );
+
+    // const status = verifyStatus(response.data.status);
+
+    // const operation = await Operation.findOne({
+    //   where: {
+    //     operationId: token,
+    //   },
+    // });
+
+    // const operationUpdate = await operation.update(
+    //   { status },
+    //   {
+    //     where: {
+    //       operationId: token,
+    //     },
+    //   }
+    // );
+
+    // const { userId, caretakerId, petId, startDate, endDate } = operation;
+    // const user = await User.findByPk(userId);
+    // const caretaker = await User.findByPk(caretakerId, {
+    //   include: [
+    //     {
+    //       model: Caretaker,
+    //     },
+    //   ],
+    // });
+    // const pet = await Pet.findByPk(petId);
+
+    const response = await axios.delete(
+      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
+    );
+
+    console.log(response.data);
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send("Algo fallo en el cancel ", error);
+  }
 };
 
 const captureOrder = async (req, res) => {
@@ -250,36 +316,40 @@ const captureOrder = async (req, res) => {
 };
 
 const editOperation = async (req, res) => {
-  const uid = req.header('uid');
-  const {id: userId, role} = req.validUser;
+  const uid = req.header("uid");
+  const { id: userId, role } = req.validUser;
   const { operationId } = req.body;
   let response;
 
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
-  
-  role === 'SUPER_ADMIN' ? response = await editDispatchOperation(operationId): response = await editStatusOperation(operationId);
+  if (userId !== uid) return res.status(401).json({ msg: "Unauthorized user" });
 
-  if(response){
-    const operations = await Operation.findAll()
-    const response = await Promise.all(operations.map(async operation => {
-      const {caretakerId, petId, userId} = operation
-      
-      const user = await User.findByPk(userId)
-      const caretaker = await User.findByPk(caretakerId)
-      const pet = await Pet.findByPk(petId)
-      
-      return {
-        operation,
-        user,
-        caretaker,
-        pet
-      }
-    }))
-    console.log('OP BACK',response)
-    return res.json(response)
+  role === "SUPER_ADMIN"
+    ? (response = await editDispatchOperation(operationId))
+    : (response = await editStatusOperation(operationId));
+
+  if (response) {
+    const operations = await Operation.findAll();
+    const response = await Promise.all(
+      operations.map(async (operation) => {
+        const { caretakerId, petId, userId } = operation;
+
+        const user = await User.findByPk(userId);
+        const caretaker = await User.findByPk(caretakerId);
+        const pet = await Pet.findByPk(petId);
+
+        return {
+          operation,
+          user,
+          caretaker,
+          pet,
+        };
+      })
+    );
+    console.log("OP BACK", response);
+    return res.json(response);
   }
 
-  res.json({ msg: 'Edit operation error' })
+  res.json({ msg: "Edit operation error" });
 };
 
 module.exports = {
