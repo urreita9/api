@@ -1,80 +1,80 @@
 const { User, Caretaker, Operation, Pet } = require('../../db');
 
 const verifyStatus = (status) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'APPROVED';
+	switch (status) {
+		case 'COMPLETED':
+			return 'APPROVED';
 
-    default:
-      return 'CREATED';
-  }
+		default:
+			return 'CREATED';
+	}
 };
 
 const searchOperations = async (operations, user) => {
-  user === 'true'
-    ? (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { caretakerId, petId } = operation;
+	user === 'true'
+		? (operations = await Promise.all(
+				operations.map(async (operation) => {
+					const { caretakerId, petId } = operation;
 
-          const caretaker = await User.findByPk(caretakerId);
-          const pet = await Pet.findByPk(petId);
+					const caretaker = await User.findByPk(caretakerId);
+					const pet = await Pet.findByPk(petId);
 
-          return {
-            operation,
-            caretaker,
-            pet,
-          };
-        })
-      ))
-    : (operations = await Promise.all(
-        operations.map(async (operation) => {
-          const { userId, petId } = operation;
+					return {
+						operation,
+						caretaker,
+						pet,
+					};
+				})
+		  ))
+		: (operations = await Promise.all(
+				operations.map(async (operation) => {
+					const { userId, petId } = operation;
 
-          const user = await User.findByPk(userId);
-          const pet = await Pet.findByPk(petId);
+					const caretaker = await User.findByPk(userId);
+					const pet = await Pet.findByPk(petId);
 
-          return {
-            operation,
-            user,
-            pet,
-          };
-        })
-      ));
+					return {
+						operation,
+						caretaker,
+						pet,
+					};
+				})
+		  ));
 
-  return operations;
+	return operations;
 };
 
 const editStatusOperation = async (operationId) => {
-  try {
-    const operation = await Operation.findByPk(operationId);
-    
-    if (!operation) return { msg: 'Operation does not exist' };
+	try {
+		const operation = await Operation.findByPk(operationId);
 
-    await operation.update({ status: 'COMPLETED' });
+		if (!operation) return { msg: 'Operation does not exist' };
 
-    return true;
-  } catch (error) {
-    return false; 
-  }
-}
+		await operation.update({ status: 'COMPLETED' });
+
+		return true;
+	} catch (error) {
+		return false;
+	}
+};
 
 const editDispatchOperation = async (operationId) => {
-  try {
-    const operation = await Operation.findByPk(operationId);
-    
-    if (!operation) return { msg: 'Operation does not exist' };
+	try {
+		const operation = await Operation.findByPk(operationId);
 
-    await operation.update({ status: 'COMPLETED', dispatch: true });
+		if (!operation) return { msg: 'Operation does not exist' };
 
-    return true;
-  } catch (error) {
-    return false; 
-  }
-}
+		await operation.update({ status: 'COMPLETED', dispatch: true });
 
-module.exports ={
-  verifyStatus,
-  searchOperations,
-  editStatusOperation,
-  editDispatchOperation,
-}
+		return true;
+	} catch (error) {
+		return false;
+	}
+};
+
+module.exports = {
+	verifyStatus,
+	searchOperations,
+	editStatusOperation,
+	editDispatchOperation,
+};
