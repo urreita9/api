@@ -1,13 +1,8 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
-const { default: axios } = require("axios");
-const { User, Caretaker, Operation, Pet } = require("../db");
-const {
-  editStatusOperation,
-  editDispatchOperation,
-  verifyStatus,
-  searchOperations,
-} = require("./functions/operationFunctions");
+require('dotenv').config();
+const nodemailer = require('nodemailer');
+const { default: axios } = require('axios');
+const { User, Caretaker, Operation, Pet } = require('../db');
+const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations, editPetReceived, editPetDelivered} = require('./functions/operationFunctions')
 
 const getOperations = async (req, res) => {
   const uid = req.header("uid");
@@ -323,11 +318,49 @@ const editOperation = async (req, res) => {
   res.json({ msg: "Edit operation error" });
 };
 
+const editPetOperation = async (req, res) => {
+  const uid = req.header('uid');
+  //const {id: userId} = req.validUser;
+  const { operationId } = req.params;
+  const { user } = req.query
+  let response;
+
+  console.log(operationId, user)
+
+  //if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  
+  user === 'false' ? response = await editPetDelivered(operationId): response = await editPetReceived(operationId);
+
+  if(response){
+    const operations = await Operation.findAll()
+    const response = await Promise.all(operations.map(async operation => {
+      const {caretakerId, petId, userId} = operation
+      
+      const user = await User.findByPk(userId)
+      const caretaker = await User.findByPk(caretakerId)
+      const pet = await Pet.findByPk(petId)
+      
+      return {
+        operation,
+        user,
+        caretaker,
+        pet
+      }
+    }))
+
+    //console.log('OP BACK',response)
+    return res.json(response)
+  }
+
+  res.json({ msg: 'Edit operation error' })
+};
+
 module.exports = {
   createOperation,
   getOperations,
   getAllOperations,
   editOperation,
+  editPetOperation,
   captureOrder,
   cancelOrder,
 };

@@ -45,6 +45,14 @@ module.exports = (sequelize) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+      petReceived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      petDelivered: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      }
     },
     { logging: false }
   );
