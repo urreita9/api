@@ -58,6 +58,20 @@ const editStatusOperation = async (operationId) => {
     }
 };
 
+const editDispatchOperation = async (operationId) => {
+    try {
+        const operation = await Operation.findByPk(operationId);
+
+        if (!operation) return { msg: 'Operation does not exist' };
+
+        await operation.update({ status: 'COMPLETED', dispatch: true });
+
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
 const editPetDelivered = async (operationId) => {
     try {
         const operation = await Operation.findByPk(operationId);
