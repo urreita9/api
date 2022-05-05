@@ -436,7 +436,7 @@
         {
             "name": "Giuliano",
             "caretaker": "Ailen",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "5",
             "price": "56",
             "startDay": "1/1/2022",
@@ -445,7 +445,7 @@
         {
             "name": "Matias",
             "caretaker": "Augusto",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "9",
             "price": "87",
             "startDay": "20/1/2022",
@@ -454,7 +454,7 @@
         {
             "name": "Lucia",
             "caretaker": "Ned",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "4",
             "price": "34",
             "startDay": "24/01/2022",
@@ -499,7 +499,7 @@
         {
             "name": "Marge",
             "caretaker": "Lisa",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "7",
             "price": "66",
             "startDay": "10/3/2022",
@@ -508,7 +508,7 @@
         {
             "name": "Ned",
             "caretaker": "Augusto",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "2",
             "price": "10",
             "startDay": "07/3/2022",
@@ -517,7 +517,7 @@
         {
             "name": "Lucia",
             "caretaker": "Augusto",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "6",
             "price": "54",
             "startDay": "10/3/2022",
@@ -526,7 +526,7 @@
         {
             "name": "Edna",
             "caretaker": "Ailen",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "4",
             "price": "30",
             "startDay": "06/3/2022",
@@ -535,7 +535,7 @@
         {
             "name": "Mariano",
             "caretaker": "Lucia",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "16",
             "price": "99",
             "startDay": "01/4/2022",
@@ -544,7 +544,7 @@
         {
             "name": "Augusto",
             "caretaker": "Moe",
-            "status": "CREATED",
+            "status": "APPROVED",
             "timelapse": "3",
             "price": "28",
             "startDay": "03/4/2022",
@@ -562,7 +562,7 @@
         {
             "name": "Edna",
             "caretaker": "Ailen",
-            "status": "CREATED",
+            "status": "CANCELED",
             "timelapse": "8",
             "price": "70",
             "startDay": "08/4/2022",
@@ -571,7 +571,7 @@
         {
             "name": "Moe",
             "caretaker": "Mariano",
-            "status": "CREATED",
+            "status": "CANCELED",
             "timelapse": "1",
             "price": "10",
             "startDay": "1/04/2022",
@@ -580,7 +580,7 @@
         {
             "name": "Mariano",
             "caretaker": "Lisa",
-            "status": "CREATED",
+            "status": "CANCELED",
             "timelapse": "5",
             "price": "50",
             "startDay": "03/04/2022",
