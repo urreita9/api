@@ -39,7 +39,7 @@ exports.bulkAction = async (req, res) => {
                         const petObj = {
                             name: pet.name,
                             age: '5',
-                            race: pet.race,
+                            race: pet.race.toLowerCase(),
                             size: pet.size,
                             img: pet.img,
                             userId: uid,
@@ -87,7 +87,7 @@ exports.bulkAction = async (req, res) => {
 
         //CREACION DE OPERACIONES Y CHATS
         if (operations.length > 0) {
-            operations.forEach(async (op) => {
+            operations.forEach(async (op, i) => {
                 const user = await User.findOne({
                     where: { name: op.name },
                     include: [
@@ -99,7 +99,7 @@ exports.bulkAction = async (req, res) => {
                 const caretaker = await User.findOne({ where: { name: op.caretaker } });
                 const pet = user.pets[0].id;
                 let opObj = {
-                    operationId: 'adjkskjdsdkjasjkdasdaskjaskjdasdjASDASDJASASD',
+                    operationId: `${i}`,
                     price: Number(op.price),
                     timeLapse: Number(op.timelapse),
                     userId: user.id,

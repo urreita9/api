@@ -147,7 +147,7 @@
             },
             {
                 "name": "Arturo",
-                "race": "CAT",
+                "race": "Cat",
                 "size": "SMALL",
                 "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGtZPkM6Tpp6rnrNOpItPB7ml0PbLxhIgCAQ&usqp=CAU"
             }
@@ -279,7 +279,7 @@
                 "name": "Fito",
                 "race": "DOG",
                 "size": "SMALL",
-                "img": "https://www.adelaide.edu.au/newsroom/sites/default/files/styles/ua_image_landscape/public/media/images/2022-03/DOG-gbfe9c6841_1920_2.jpg?h=7187ef5e&itok=dwP19Jw4"
+                "img": "https://www.adelaide.edu.au/newsroom/sites/default/files/styles/ua_image_landscape/public/media/images/2022-03/dog-gbfe9c6841_1920_2.jpg?h=7187ef5e&itok=dwP19Jw4"
             }
         ],
         [
@@ -298,7 +298,8 @@
                 "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZQIDnydkpuJvQtwUwbC4_rLtFjLxUKAKo9A&usqp=CAU"
             }
         ]
-    ],
+    ]
+    ,
     "caretakers": [
         {
             "name": "Augusto",
