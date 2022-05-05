@@ -1,80 +1,96 @@
 const { User, Caretaker, Operation, Pet } = require('../../db');
 
 const verifyStatus = (status) => {
-	switch (status) {
-		case 'COMPLETED':
-			return 'APPROVED';
+    switch (status) {
+        case 'COMPLETED':
+            return 'APPROVED';
 
-		default:
-			return 'CREATED';
-	}
+        default:
+            return 'CREATED';
+    }
 };
 
 const searchOperations = async (operations, user) => {
-	user === 'true'
-		? (operations = await Promise.all(
-				operations.map(async (operation) => {
-					const { caretakerId, petId } = operation;
+    user === 'true'
+        ? (operations = await Promise.all(
+              operations.map(async (operation) => {
+                  const { caretakerId, petId } = operation;
 
-					const caretaker = await User.findByPk(caretakerId);
-					const pet = await Pet.findByPk(petId);
+                  const caretaker = await User.findByPk(caretakerId);
+                  const pet = await Pet.findByPk(petId);
 
-					return {
-						operation,
-						caretaker,
-						pet,
-					};
-				})
-		  ))
-		: (operations = await Promise.all(
-				operations.map(async (operation) => {
-					const { userId, petId } = operation;
+                  return {
+                      operation,
+                      caretaker,
+                      pet,
+                  };
+              })
+          ))
+        : (operations = await Promise.all(
+              operations.map(async (operation) => {
+                  const { userId, petId } = operation;
 
-					const caretaker = await User.findByPk(userId);
-					const pet = await Pet.findByPk(petId);
+                  const caretaker = await User.findByPk(userId);
+                  const pet = await Pet.findByPk(petId);
 
-					return {
-						operation,
-						caretaker,
-						pet,
-					};
-				})
-		  ));
+                  return {
+                      operation,
+                      caretaker,
+                      pet,
+                  };
+              })
+          ));
 
-	return operations;
+    return operations;
 };
 
 const editStatusOperation = async (operationId) => {
-	try {
-		const operation = await Operation.findByPk(operationId);
+    try {
+        const operation = await Operation.findByPk(operationId);
 
-		if (!operation) return { msg: 'Operation does not exist' };
+        if (!operation) return { msg: 'Operation does not exist' };
 
-		await operation.update({ status: 'COMPLETED' });
+        await operation.update({ status: 'COMPLETED' });
 
-		return true;
-	} catch (error) {
-		return false;
-	}
+        return true;
+    } catch (error) {
+        return false;
+    }
 };
 
-const editDispatchOperation = async (operationId) => {
-	try {
-		const operation = await Operation.findByPk(operationId);
+const editPetDelivered = async (operationId) => {
+    try {
+        const operation = await Operation.findByPk(operationId);
 
-		if (!operation) return { msg: 'Operation does not exist' };
+        if (!operation) return { msg: 'Operation does not exist' };
 
-		await operation.update({ status: 'COMPLETED', dispatch: true });
+        await operation.update({ petDelivered: true });
 
-		return true;
-	} catch (error) {
-		return false;
-	}
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+const editPetReceived = async (operationId) => {
+    try {
+        const operation = await Operation.findByPk(operationId);
+
+        if (!operation) return { msg: 'Operation does not exist' };
+
+        await operation.update({ petReceived: true });
+
+        return true;
+    } catch (error) {
+        return false;
+    }
 };
 
 module.exports = {
-	verifyStatus,
-	searchOperations,
-	editStatusOperation,
-	editDispatchOperation,
+    verifyStatus,
+    searchOperations,
+    editStatusOperation,
+    editDispatchOperation,
+    editPetDelivered,
+    editPetReceived,
 };

@@ -1,11 +1,11 @@
-const { Router } = require('express');
-const server = require('../app');
+const { Router } = require("express");
+const server = require("../app");
 const router = Router();
 const {
   validarJWT,
   validarSuperAdminyAdmin,
   validarAdmin,
-} = require('../middlewares');
+} = require("../middlewares");
 const {
   createOperation,
   captureOrder,
@@ -13,11 +13,13 @@ const {
   getOperations,
   getAllOperations,
   editOperation,
+  editPetOperation
 } = require('../controllers/operations');
 
 router.get('/', validarJWT, getOperations);
 router.get('/all', [validarJWT, validarSuperAdminyAdmin], getAllOperations);
 router.put('/', [validarJWT, validarSuperAdminyAdmin], editOperation);
+router.put('/:operationId', editPetOperation);
 router.post('/create-order', createOperation);
 router.get('/capture-order', captureOrder);
 router.get('/cancel-order', cancelOrder);

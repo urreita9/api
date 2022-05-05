@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { User } = require('../db');
 
 const generarJWT = (uid = '', expires = '') => {
     return new Promise((resolve, reject) => {
@@ -33,9 +34,15 @@ const generarJWT = (uid = '', expires = '') => {
     });
 };
 
-const comprobarJWT = (token = '') => {
+const comprobarJWT = async (token = '') => {
     try {
         const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+
+        const user = await User.findByPk(uid);
+
+        if (!user) {
+            return [false, null];
+        }
 
         return [true, uid];
     } catch (error) {
