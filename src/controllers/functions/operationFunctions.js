@@ -30,12 +30,12 @@ const searchOperations = async (operations, user) => {
         operations.map(async (operation) => {
           const { userId, petId } = operation;
 
-          const user = await User.findByPk(userId);
+          const caretaker = await User.findByPk(userId);
           const pet = await Pet.findByPk(petId);
 
           return {
             operation,
-            user,
+            caretaker,
             pet,
           };
         })
@@ -78,7 +78,7 @@ const editPetDelivered = async (operationId) => {
     
     if (!operation) return { msg: 'Operation does not exist' };
 
-    //await operation.update({ : true });
+    await operation.update({ petDelivered: true });
 
     return true;
   } catch (error) {
@@ -88,7 +88,17 @@ const editPetDelivered = async (operationId) => {
 
 
 const editPetReceived = async (operationId) => {
+ try {
+    const operation = await Operation.findByPk(operationId);
+    
+    if (!operation) return { msg: 'Operation does not exist' };
 
+    await operation.update({ petReceived: true });
+
+    return true;
+  } catch (error) {
+    return false; 
+  }
 
   
 }
@@ -99,4 +109,6 @@ module.exports ={
   searchOperations,
   editStatusOperation,
   editDispatchOperation,
+  editPetDelivered,
+  editPetReceived
 }

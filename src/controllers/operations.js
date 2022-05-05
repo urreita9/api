@@ -2,7 +2,7 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const { default: axios } = require('axios');
 const { User, Caretaker, Operation, Pet } = require('../db');
-const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations} = require('./functions/operationFunctions')
+const { editStatusOperation, editDispatchOperation, verifyStatus, searchOperations, editPetReceived, editPetDelivered} = require('./functions/operationFunctions')
 
 const getOperations = async (req, res) => {
   const uid = req.header("uid");
@@ -284,12 +284,14 @@ const editOperation = async (req, res) => {
 
 const editPetOperation = async (req, res) => {
   const uid = req.header('uid');
-  const {id: userId} = req.validUser;
-  const { operationId } = req.body;
-  const {user} = req.query
+  //const {id: userId} = req.validUser;
+  const { operationId } = req.params;
+  const { user } = req.query
   let response;
 
-  if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
+  console.log(operationId, user)
+
+  //if (userId !== uid) return res.status(401).json({ msg: 'Unauthorized user' });
   
   user === 'false' ? response = await editPetDelivered(operationId): response = await editPetReceived(operationId);
 
@@ -310,7 +312,7 @@ const editPetOperation = async (req, res) => {
       }
     }))
 
-    console.log('OP BACK',response)
+    //console.log('OP BACK',response)
     return res.json(response)
   }
 
