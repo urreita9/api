@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { response } = require('express');
 const { request } = require('express');
-const { User, Pet, Caretaker, Image, Chat, Message } = require('../db');
+const { User, Pet, Caretaker, Operation, Image, Chat, Message } = require('../db');
 const bcryptjs = require('bcryptjs');
 const nodemailer = require('nodemailer');
 
@@ -14,6 +14,14 @@ const getUsers = async (req = request, res = response) => {
             },
             {
                 model: Caretaker,
+                include: [
+                    {
+                        model: Image,
+                    },
+                ],
+            },
+            {
+                model: Operation,
             },
             {
                 model: Chat,
