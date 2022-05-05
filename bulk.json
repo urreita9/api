@@ -63,7 +63,7 @@
         {
             "name": "Lisa",
             "lastname": "Simpson",
-            "img": "https://static.wikia.nocookie.net/lossimpson/images/e/ec/Lisa_Simpson.png/revision/latest/top-crop/width/360/height/450?cb=20101120082357&path-prefix=es"
+            "img": "http://assets.stickpng.com/images/5eb95cf617f3c600044a2915.png"
         },
         {
             "name": "Bart",
@@ -298,8 +298,7 @@
                 "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZQIDnydkpuJvQtwUwbC4_rLtFjLxUKAKo9A&usqp=CAU"
             }
         ]
-    ]
-    ,
+    ],
     "caretakers": [
         {
             "name": "Augusto",
@@ -308,9 +307,9 @@
             "price": "7",
             "size": "0",
             "images": [
-                "https://www.pexels.com/photo/house-lights-turNed-on-106399/",
-                "https://www.pexels.com/photo/blue-and-gray-concrete-house-with-attic-during-twilight-186077/",
-                "https://www.pexels.com/photo/modern-building-against-sky-323780/"
+                "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260",
+                "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260",
+                "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260"
             ],
             "rating": "3.8"
         },
@@ -321,9 +320,9 @@
             "price": "8.2",
             "size": "3",
             "images": [
-                "https://www.pexels.com/photo/white-and-red-wooden-house-with-fence-1029599/",
-                "https://www.pexels.com/photo/brown-and-gray-painted-house-in-front-of-road-1396122/",
-                "https://www.pexels.com/photo/yellow-concrete-house-2102587/"
+                "https://images.pexels.com/photos/1029599/pexels-photo-1029599.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/2102587/pexels-photo-2102587.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "3.1"
         },
@@ -334,9 +333,9 @@
             "price": "9.6",
             "size": "1",
             "images": [
-                "https://www.pexels.com/photo/brown-and-white-wooden-house-164558/",
-                "https://www.pexels.com/photo/architecture-clouds-daylight-driveway-259588/",
-                "https://www.pexels.com/photo/turNed-off-flat-screen-tv-276724/"
+                "https://images.pexels.com/photos/164558/pexels-photo-164558.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "2.5"
         },
@@ -347,9 +346,9 @@
             "price": "11.5",
             "size": "2",
             "images": [
-                "https://www.pexels.com/photo/four-brown-wooden-chairs-2635038/",
-                "https://www.pexels.com/photo/architecture-beautiful-home-building-class-280229/",
-                "https://www.pexels.com/photo/white-single-story-houses-beside-body-of-water-1438832/"
+                "https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/1643389/pexels-photo-1643389.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/280222/pexels-photo-280222.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "4.8"
         },
@@ -360,9 +359,9 @@
             "price": "19",
             "size": "1",
             "images": [
-                "https://www.pexels.com/photo/gazebo-against-trees-334978/",
-                "https://www.pexels.com/photo/green-plant-212942/",
-                "https://www.pexels.com/photo/person-pouring-wine-on-a-glass-above-a-wicker-basket-4099106/"
+                "https://images.pexels.com/photos/2360684/pexels-photo-2360684.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/4596801/pexels-photo-4596801.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/1144694/pexels-photo-1144694.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "4.3"
         },
@@ -373,9 +372,9 @@
             "price": "14.1",
             "size": "2",
             "images": [
-                "https://www.pexels.com/photo/pathway-in-the-middle-of-linear-leaf-plants-1065874/",
-                "https://www.pexels.com/photo/brown-wooden-house-near-plants-and-trees-1144694/",
-                "https://www.pexels.com/photo/exotic-park-with-stone-monuments-in-tropical-country-4530530/"
+                "https://images.pexels.com/photos/1065874/pexels-photo-1065874.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/4597121/pexels-photo-4597121.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/2974834/pexels-photo-2974834.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "3.9"
         },
@@ -386,9 +385,9 @@
             "price": "6.9",
             "size": "3",
             "images": [
-                "https://www.pexels.com/photo/plants-in-a-greenhouse-4597121/",
-                "https://www.pexels.com/photo/green-yard-with-plants-and-ceramic-path-5018180/",
-                "https://www.pexels.com/photo/famous-footbridge-over-calm-river-in-summer-garden-5473050/"
+                "https://images.pexels.com/photos/5473050/pexels-photo-5473050.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/6272310/pexels-photo-6272310.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/7174112/pexels-photo-7174112.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "3.5"
         },
@@ -399,9 +398,9 @@
             "price": "8.4",
             "size": "3",
             "images": [
-                "https://www.pexels.com/photo/food-on-brown-wooden-table-with-chairs-and-plates-5638639/",
-                "https://www.pexels.com/photo/woman-harvesting-vegetables-in-rural-area-6272310/",
-                "https://www.pexels.com/photo/crop-gardener-with-seCATeurs-working-on-bush-5231138/"
+                "https://images.pexels.com/photos/9792165/pexels-photo-9792165.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/126271/pexels-photo-126271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "4.7"
         },
@@ -412,9 +411,9 @@
             "price": "10",
             "size": "0",
             "images": [
-                "https://www.pexels.com/photo/brown-wooden-gazebo-surrounded-by-green-trees-and-a-pond-7174112/",
-                "https://www.pexels.com/photo/pathway-between-trees-towards-house-126271/",
-                "https://www.pexels.com/photo/gray-concrete-pathway-besides-pink-flower-during-day-158028/"
+                "https://images.pexels.com/photos/158028/bellingrath-gardens-alabama-landscape-scenic-158028.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/126271/pexels-photo-126271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/59321/pexels-photo-59321.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "4.2"
         },
@@ -425,13 +424,14 @@
             "price": "4.8",
             "size": "2",
             "images": [
-                "https://www.pexels.com/photo/pathway-between-trees-towards-house-126271/",
-                "https://www.pexels.com/photo/round-brown-wooden-5-piece-dining-set-on-lawn-grass-59321/",
-                "https://www.pexels.com/photo/assorted-plants-with-trees-photography-7283/"
+                "https://images.pexels.com/photos/7283/garden.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/1043458/pexels-photo-1043458.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                "https://images.pexels.com/photos/1468191/pexels-photo-1468191.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             ],
             "rating": "4.9"
         }
     ],
+
     "operations": [
         {
             "name": "Giuliano",

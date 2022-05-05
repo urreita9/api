@@ -113,6 +113,9 @@ exports.bulkAction = async (req, res) => {
                 await Operation.findOrCreate({ where: opObj });
 
                 //Crear Chat
+                const chat = await Chat.create();
+
+                await chat.setUsers([user.id, caretaker.id]);
             });
         }
     } catch (error) {}
